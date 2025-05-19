@@ -69,7 +69,7 @@ function generateRandomTicket(index: number): Ticket {
 
   return {
     id: crypto.randomUUID(),
-    title: sampleTitles[index % sampleTitles.length] + (Math.random() > 0.8 ? ` - Issue #${Math.floor(Math.random()*1000)}` : ""),
+    title: sampleTitles[index % sampleTitles.length] + (Math.random() > 0.8 ? ` - Incidencia #${Math.floor(Math.random()*1000)}` : ""),
     description: sampleDescriptions[index % sampleDescriptions.length] + (Math.random() > 0.5 ? " Se necesita atención urgente." : " Por favor, revisar cuando sea posible."),
     category: sampleCategories[index % sampleCategories.length],
     priority: samplePriorities[index % samplePriorities.length],
@@ -96,23 +96,23 @@ function getInitialTickets(): Ticket[] {
         if (parsed.every(t => typeof t === 'object' && t !== null && 'id' in t && 'title' in t)) {
             ticketsFromStorage = parsed;
         } else if (parsed.length > 0) { // If it's an array but not of tickets
-            console.warn("Stored data in localStorage is an array but not of valid tickets. Discarding.");
+            console.warn("Los datos almacenados en localStorage son un array pero no de tickets válidos. Descartando.");
             localStorage.removeItem(TICKETS_STORAGE_KEY);
         }
         // If parsed is an empty array, ticketsFromStorage remains []
       } else {
-        console.warn("Stored tickets data was not an array. Discarding.");
+        console.warn("Los datos de tickets almacenados no eran un array. Descartando.");
         localStorage.removeItem(TICKETS_STORAGE_KEY); // Clear invalid data
       }
     } catch (e) {
-      console.error("Error parsing tickets from localStorage. Discarding.", e);
+      console.error("Error al parsear tickets desde localStorage. Descartando.", e);
       localStorage.removeItem(TICKETS_STORAGE_KEY); // Clear corrupted data
     }
   }
 
   // If no tickets were loaded from storage (it was null, empty, parsing failed, or data was invalid)
   if (ticketsFromStorage.length === 0) {
-    const exampleTickets = Array.from({ length: 20 }, (_, i) => generateRandomTicket(i));
+    const exampleTickets = Array.from({ length: 10 }, (_, i) => generateRandomTicket(i)); // CAMBIADO DE 20 a 10
     localStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(exampleTickets));
     return exampleTickets.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
@@ -202,3 +202,4 @@ export function useTicketStore() {
     isInitialized
   };
 }
+
