@@ -112,7 +112,7 @@ function getInitialTickets(): Ticket[] {
 
   // If no tickets were loaded from storage (it was null, empty, parsing failed, or data was invalid)
   if (ticketsFromStorage.length === 0) {
-    const exampleTickets = Array.from({ length: 10 }, (_, i) => generateRandomTicket(i)); // CAMBIADO DE 20 a 10
+    const exampleTickets = Array.from({ length: 10 }, (_, i) => generateRandomTicket(i)); // Generar 10 tickets
     localStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(exampleTickets));
     return exampleTickets.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
@@ -202,4 +202,3 @@ export function useTicketStore() {
     isInitialized
   };
 }
-
