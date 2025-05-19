@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,51 +10,83 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Leer el tema desde localStorage al montar el componente
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme) {
+      setIsDarkMode(storedTheme === "dark");
+    } else {
+      // Opcional: detectar preferencia del sistema si no hay nada en localStorage
+      // const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // setIsDarkMode(prefersDark);
+      // localStorage.setItem("theme", prefersDark ? "dark" : "light");
+      // if (prefersDark) {
+      //   document.documentElement.classList.add("dark");
+      // }
+      // Por simplicidad, si no hay nada, se asume light
+      setIsDarkMode(false);
+      localStorage.setItem("theme", "light");
+    }
+  }, []);
+
+  const handleThemeChange = (checked: boolean) => {
+    setIsDarkMode(checked);
+    if (checked) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
+
   return (
     <div className="container mx-auto py-4">
-      <h1 className="text-3xl font-bold mb-8 text-primary">Settings</h1>
+      <h1 className="text-3xl font-bold mb-8 text-primary">Configuración</h1>
       <Card className="w-full max-w-2xl mx-auto shadow-lg">
         <CardHeader>
-          <CardTitle>Application Settings</CardTitle>
-          <CardDescription>Manage your application preferences here.</CardDescription>
+          <CardTitle>Preferencias de la Aplicación</CardTitle>
+          <CardDescription>Gestiona tus preferencias de la aplicación aquí.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input id="username" placeholder="Your username" defaultValue="DevUser" />
+            <Label htmlFor="username">Nombre de Usuario</Label>
+            <Input id="username" placeholder="Tu nombre de usuario" defaultValue="DevUser" />
           </div>
           
           <Separator />
 
           <div className="space-y-2">
-            <h3 className="text-lg font-medium">Notifications</h3>
+            <h3 className="text-lg font-medium">Notificaciones</h3>
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <Label htmlFor="email-notifications" className="text-base">
-                  Email Notifications
+                  Notificaciones por Email
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Receive email updates for important events.
+                  Recibe actualizaciones por email para eventos importantes.
                 </p>
               </div>
               <Switch
                 id="email-notifications"
-                aria-label="Toggle email notifications"
+                aria-label="Activar notificaciones por email"
               />
             </div>
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <Label htmlFor="push-notifications" className="text-base">
-                  Push Notifications
+                  Notificaciones Push
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Get push notifications on your devices. (Coming soon!)
+                  Recibe notificaciones push en tus dispositivos. (¡Próximamente!)
                 </p>
               </div>
               <Switch
                 id="push-notifications"
                 disabled
-                aria-label="Toggle push notifications"
+                aria-label="Activar notificaciones push"
               />
             </div>
           </div>
@@ -59,19 +94,21 @@ export default function SettingsPage() {
           <Separator />
           
           <div className="space-y-2">
-            <h3 className="text-lg font-medium">Theme</h3>
+            <h3 className="text-lg font-medium">Tema</h3>
             <div className="flex items-center justify-between rounded-lg border p-4">
                <div className="space-y-0.5">
                 <Label htmlFor="dark-mode" className="text-base">
-                  Dark Mode
+                  Modo Oscuro
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Enable or disable dark mode for the application.
+                  Activa o desactiva el modo oscuro para la aplicación.
                 </p>
               </div>
               <Switch
                 id="dark-mode"
-                aria-label="Toggle dark mode"
+                aria-label="Activar modo oscuro"
+                checked={isDarkMode}
+                onCheckedChange={handleThemeChange}
               />
             </div>
           </div>
