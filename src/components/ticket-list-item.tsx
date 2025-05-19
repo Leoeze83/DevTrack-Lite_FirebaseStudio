@@ -80,7 +80,7 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <CardDescription className="text-sm text-muted-foreground line-clamp-3 min-h-[3.75rem]"> {/* Ajustar min-h según necesidad para 3 líneas */}
+        <CardDescription className="text-sm text-muted-foreground line-clamp-2 min-h-[3rem]"> {/* Reducido a 2 líneas y ajustado min-h */}
           {ticket.description}
         </CardDescription>
       </CardHeader>
@@ -97,14 +97,14 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
             )}
         </div>
          <div className="flex flex-wrap gap-2 items-center">
-          <Badge variant="outline" className={`flex items-center gap-1 py-0.5 px-2 text-xs font-medium ${statusColors[ticket.status]}`}>
+          <Badge variant="outline" className={`flex items-center gap-1.5 py-1 px-2 text-xs ${statusColors[ticket.status]}`}> {/* Ajustado padding py y px */}
             {React.cloneElement(statusIcons[ticket.status], { className: `h-3.5 w-3.5` })}
             {statusTranslations[ticket.status]}
           </Badge>
-          <Badge variant="secondary" className="py-0.5 px-2 text-xs">{ticket.category}</Badge>
+          <Badge variant="secondary" className="py-1 px-2 text-xs">{ticket.category}</Badge> {/* Ajustado padding py y px */}
           <Badge 
             variant={ticket.priority === "high" ? "destructive" : ticket.priority === "medium" ? "outline" : "default"} 
-            className={`py-0.5 px-2 text-xs ${
+            className={`py-1 px-2 text-xs ${ // Ajustado padding py y px
               ticket.priority === "high" ? "bg-red-100 text-red-700 border-red-300 hover:bg-red-200" 
               : ticket.priority === "medium" ? "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200" 
               : "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200"
@@ -119,14 +119,17 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between items-center pt-4 border-t">
+      <CardFooter className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between pt-4 border-t">
         <div className="text-sm text-muted-foreground">
             Registrado: {(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs
         </div>
-        <Button size="sm" onClick={() => onLogTimeClick(ticket)}>
+        <Button size="sm" onClick={() => onLogTimeClick(ticket)} className="w-full sm:w-auto"> {/* Botón ocupa todo el ancho en móvil */}
           <Timer className="mr-2 h-4 w-4" /> Registrar Tiempo
         </Button>
       </CardFooter>
     </Card>
   );
 };
+
+
+    
