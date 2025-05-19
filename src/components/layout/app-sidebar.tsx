@@ -13,12 +13,13 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { TicketCheck, LayoutDashboard, PlusSquare, List, Settings, LogOut, Users } from "lucide-react";
+import { TicketCheck, LayoutDashboard, PlusSquare, Settings, LogOut, Users, BarChart3, List } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Panel Principal", icon: LayoutDashboard },
   { href: "/tickets/create", label: "Crear Ticket", icon: PlusSquare },
-  { href: "/tickets", label: "Todos los Tickets", icon: List },
+  // { href: "/tickets", label: "Todos los Tickets", icon: List }, // Comentado o eliminado
+  { href: "/reports", label: "Informes", icon: BarChart3 }, // Nuevo enlace de Informes
 ];
 
 const adminNavItems = [
@@ -44,7 +45,7 @@ export const AppSidebar: FC = () => {
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname === item.href}
+                isActive={pathname === item.href || (item.href === "/reports" && pathname.startsWith("/reports"))} // Ajuste para isActive
                 tooltip={{ children: item.label, className: "ml-2"}}
               >
                 <Link href={item.href}>
@@ -63,7 +64,7 @@ export const AppSidebar: FC = () => {
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname.startsWith(item.href)} // Use startsWith for parent routes
+                isActive={pathname.startsWith(item.href)} 
                 tooltip={{ children: item.label, className: "ml-2"}}
               >
                 <Link href={item.href}>
@@ -91,7 +92,7 @@ export const AppSidebar: FC = () => {
             </SidebarMenuItem>
              <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={{ children: "Cerrar Sesión", className: "ml-2"}} variant="outline">
-                <Link href="#"> {/* Mantener href="#" por ahora, ya que no hay lógica de auth */}
+                <Link href="#"> 
                   <LogOut />
                   <span>Cerrar Sesión</span>
                 </Link>
