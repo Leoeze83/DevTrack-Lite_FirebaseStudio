@@ -10,7 +10,7 @@ import { TicketsByStatusChart } from "./charts/tickets-by-status-chart";
 import { TicketsByPriorityChart } from "./charts/tickets-by-priority-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, LayoutGrid, BarChartHorizontalBig, PieChartIcon } from "lucide-react";
+import { Info, LayoutGrid, BarChartHorizontalBig, PieChartIcon, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TicketsCreatedOverTimeChart } from "./charts/tickets-created-over-time-chart";
 import { TimeLoggedSummaryChart } from "./charts/time-logged-summary-chart";
