@@ -55,8 +55,12 @@ export const AppSidebar: FC = () => {
       <SidebarFooter className="p-2 border-t border-sidebar-border">
          <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={{ children: "Settings", className: "ml-2"}}>
-                <Link href="#">
+              <SidebarMenuButton 
+                asChild 
+                tooltip={{ children: "Settings", className: "ml-2"}}
+                isActive={pathname === "/settings"}
+              >
+                <Link href="/settings">
                   <Settings />
                   <span>Settings</span>
                 </Link>
