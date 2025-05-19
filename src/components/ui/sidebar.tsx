@@ -4,7 +4,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { PanelLeft, PanelLeftOpen } from "lucide-react" // Añadido PanelLeftOpen aquí
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -48,6 +48,21 @@ function useSidebar() {
 
   return context
 }
+
+// Helper for merging refs
+function useComposedRefs<T>(...refs: (ForwardedRef<T> | null | undefined)[]) {
+  return React.useCallback((node: T) => {
+    for (const ref of refs) {
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref != null) {
+        (ref as React.MutableRefObject<T | null>).current = node;
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, refs);
+}
+
 
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
@@ -263,9 +278,9 @@ Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
-  React.ComponentProps<typeof Button> // This already includes asChild and children
->(({ className, onClick, asChild, children, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  React.ComponentProps<typeof Button>
+>(({ className, onClick, children, asChild, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
 
   return (
     <Button
@@ -275,14 +290,12 @@ const SidebarTrigger = React.forwardRef<
       size="icon"
       className={cn("h-7 w-7", className)}
       onClick={(event) => {
-        onClick?.(event)
-        toggleSidebar()
+        onClick?.(event);
+        toggleSidebar();
       }}
-      asChild={asChild} // Pass the asChild prop to the underlying Button
+      asChild={asChild}
       {...props}
     >
-      {/* If asChild is true, render the children passed to SidebarTrigger.
-          Otherwise, render the default icon and span. */}
       {asChild ? children : (
         <>
           <PanelLeftOpen />
@@ -290,8 +303,8 @@ const SidebarTrigger = React.forwardRef<
         </>
       )}
     </Button>
-  )
-})
+  );
+});
 SidebarTrigger.displayName = "SidebarTrigger"
 
 const SidebarRail = React.forwardRef<
@@ -542,26 +555,11 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-// Helper for merging refs
-function useComposedRefs<T>(...refs: (ForwardedRef<T> | null | undefined)[]) {
-  return React.useCallback((node: T) => {
-    for (const ref of refs) {
-      if (typeof ref === 'function') {
-        ref(node);
-      } else if (ref != null) {
-        (ref as React.MutableRefObject<T | null>).current = node;
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, refs);
-}
-
-
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<typeof Button> & { // This already includes asChild and children
-    isActive?: boolean
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>
+  React.ComponentProps<typeof Button> & {
+    isActive?: boolean;
+    tooltip?: string | React.ComponentProps<typeof TooltipContent>;
   } & VariantProps<typeof sidebarMenuButtonVariants>
 >(
   (
@@ -577,24 +575,24 @@ const SidebarMenuButton = React.forwardRef<
     },
     ref // This is ForwardedRef<HTMLButtonElement>
   ) => {
-    const { isMobile, state } = useSidebar()
+    const { isMobile, state } = useSidebar();
 
     if (asChild && tooltip) {
       const childElement = React.Children.only(originalChildren) as React.ReactElement<any, string | React.JSXElementConstructor<any>>;
       const childProps = childElement.props || {};
-
+      
       const styledAndProppedChild = React.cloneElement(
         childElement,
         {
-          // When asChild and tooltip are both true, we don't pass SidebarMenuButton's own `ref`
-          // to the cloned child. The TooltipTrigger will handle its own ref needs for the child.
-          // The child's original ref (if any, from childProps.ref) is preserved.
+          // Explicitly omit SidebarMenuButton's ref when asChild & tooltip are true
+          // The childElement's original ref (if any) is preserved via childProps.ref
+          ref: childProps.ref, // Preserve original ref if any, otherwise it's undefined
           "data-sidebar": "menu-button",
           "data-size": size,
           "data-active": isActive,
           className: cn(sidebarMenuButtonVariants({ variant, size }), className, childProps.className),
-          ...childProps,
-          ...restProps,
+          ...childProps, // Spread original child props first
+          ...restProps,  // Then spread SidebarMenuButton's props (excluding its own ref)
         }
       );
 
@@ -617,7 +615,7 @@ const SidebarMenuButton = React.forwardRef<
       const Comp = asChild ? Slot : "button";
       const buttonElement = (
         <Comp
-          ref={ref} // Standard ref handling for Button or Slot
+          ref={ref}
           data-sidebar="menu-button"
           data-size={size}
           data-active={isActive}
@@ -631,33 +629,25 @@ const SidebarMenuButton = React.forwardRef<
       if (!tooltip) {
         return buttonElement;
       }
-      // If `asChild` is false, and tooltip is present
-      const tooltipContent = typeof tooltip === "string" ? { children: tooltip } : tooltip;
 
+      const tooltipContent = typeof tooltip === "string" ? { children: tooltip } : tooltip;
+      
       return (
         <Tooltip>
-           {/*
-            When `Comp` is "button" (i.e., `asChild` is false), `TooltipTrigger` does not need `asChild`.
-            The `buttonElement` itself is the trigger.
-            When `Comp` is `Slot` (i.e., `asChild` is true, but no tooltip, handled above), this path isn't hit.
-            This logic path is primarily for `asChild={false}` with a tooltip.
-          */}
           <TooltipTrigger asChild={Comp === Slot}>
             {buttonElement}
           </TooltipTrigger>
           <TooltipContent
             side="right"
             align="center"
-            // `Comp === Slot` is equivalent to `asChild`. Tooltip shown when collapsed or mobile.
-            hidden={ (Comp === Slot ? state !== "collapsed" : false) || isMobile }
-
+            hidden={(Comp === Slot && state !== "collapsed" && !isMobile) || (Comp !== Slot && isMobile)}
             {...tooltipContent}
           />
         </Tooltip>
       );
     }
   }
-)
+);
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
 const SidebarMenuAction = React.forwardRef<
