@@ -4,14 +4,14 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft, PanelLeftOpen } from "lucide-react" // Añadido PanelLeftOpen aquí
+import { PanelLeft, PanelLeftOpen } from "lucide-react" 
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet" // SheetTitle añadido aquí
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -223,6 +223,8 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
+            {/* SheetTitle añadido para accesibilidad */}
+            <SheetTitle className="sr-only">Navegación Principal</SheetTitle>
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
         </Sheet>
@@ -293,13 +295,13 @@ const SidebarTrigger = React.forwardRef<
         onClick?.(event);
         toggleSidebar();
       }}
-      asChild={asChild}
-      {...props}
+      {...props} // asChild se pasa a través de props
+      asChild={asChild} // Se pasa explícitamente asChild
     >
       {asChild ? children : (
         <>
           <PanelLeftOpen />
-          <span className="sr-only">Toggle Sidebar</span>
+          <span className="sr-only">Alternar Menú</span>
         </>
       )}
     </Button>
@@ -584,15 +586,13 @@ const SidebarMenuButton = React.forwardRef<
       const styledAndProppedChild = React.cloneElement(
         childElement,
         {
-          // Explicitly omit SidebarMenuButton's ref when asChild & tooltip are true
-          // The childElement's original ref (if any) is preserved via childProps.ref
-          ref: childProps.ref, // Preserve original ref if any, otherwise it's undefined
+          ref: childProps.ref, // Preserve original ref, don't pass SidebarMenuButton's `ref` here directly
           "data-sidebar": "menu-button",
           "data-size": size,
           "data-active": isActive,
           className: cn(sidebarMenuButtonVariants({ variant, size }), className, childProps.className),
-          ...childProps, // Spread original child props first
-          ...restProps,  // Then spread SidebarMenuButton's props (excluding its own ref)
+          ...childProps, 
+          ...restProps, 
         }
       );
 
@@ -640,7 +640,9 @@ const SidebarMenuButton = React.forwardRef<
           <TooltipContent
             side="right"
             align="center"
-            hidden={(Comp === Slot && state !== "collapsed" && !isMobile) || (Comp !== Slot && isMobile)}
+            // Conditional hiding logic based on whether it's a Slot or a regular button,
+            // and sidebar state.
+            hidden={ (asChild && state !== "collapsed" && !isMobile) || (!asChild && isMobile) || (!asChild && state !== "collapsed")}
             {...tooltipContent}
           />
         </Tooltip>
