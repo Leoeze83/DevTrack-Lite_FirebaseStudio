@@ -1,0 +1,100 @@
+"use client";
+
+import type { FC } from "react";
+import type { Ticket, Status } from "@/lib/types";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Archive, CheckCircle2, CircleDot, Clock, HelpCircle, LoaderCircle, MoreVertical, PauseCircle, Timer } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+interface TicketListItemProps {
+  ticket: Ticket;
+  onLogTimeClick: (ticket: Ticket) => void;
+  onUpdateStatus: (ticketId: string, status: Status) => void;
+}
+
+const statusIcons: Record<Status, JSX.Element> = {
+  Open: <CircleDot className="h-4 w-4 text-blue-500" />,
+  "In Progress": <LoaderCircle className="h-4 w-4 text-yellow-500 animate-spin" />,
+  Pending: <PauseCircle className="h-4 w-4 text-orange-500" />,
+  Resolved: <CheckCircle2 className="h-4 w-4 text-green-500" />,
+  Closed: <Archive className="h-4 w-4 text-gray-500" />,
+};
+
+const statusColors: Record<Status, string> = {
+  Open: "bg-blue-100 text-blue-700",
+  "In Progress": "bg-yellow-100 text-yellow-700",
+  Pending: "bg-orange-100 text-orange-700",
+  Resolved: "bg-green-100 text-green-700",
+  Closed: "bg-gray-100 text-gray-700",
+};
+
+
+export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick, onUpdateStatus }) => {
+  const availableStatuses: Status[] = ["Open", "In Progress", "Pending", "Resolved", "Closed"];
+
+  return (
+    <Card className="shadow-md hover:shadow-lg transition-shadow duration-200">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-lg mb-1">{ticket.title}</CardTitle>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {availableStatuses.map(status => (
+                <DropdownMenuItem key={status} onClick={() => onUpdateStatus(ticket.id, status)} disabled={ticket.status === status}>
+                  Set as {status}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <CardDescription className="text-sm text-muted-foreground line-clamp-2">
+          {ticket.description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>Created {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true })}</span>
+            </div>
+            {ticket.updatedAt !== ticket.createdAt && (
+                 <div className="flex items-center gap-1">
+                    <span>Updated {formatDistanceToNow(new Date(ticket.updatedAt), { addSuffix: true })}</span>
+                </div>
+            )}
+        </div>
+         <div className="flex flex-wrap gap-2 items-center">
+          <Badge variant="outline" className={`flex items-center gap-1.5 ${statusColors[ticket.status]}`}>
+            {statusIcons[ticket.status]}
+            {ticket.status}
+          </Badge>
+          <Badge variant="secondary">{ticket.category}</Badge>
+          <Badge variant={ticket.priority === "high" ? "destructive" : ticket.priority === "medium" ? "outline" : "default" } className={ticket.priority === "medium" ? "border-yellow-500 text-yellow-600" : ""}>
+            Priority: {ticket.priority}
+          </Badge>
+        </div>
+        {ticket.tags && ticket.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {ticket.tags.map(tag => <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>)}
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-between items-center">
+        <div className="text-sm text-muted-foreground">
+            Logged: {(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs
+        </div>
+        <Button size="sm" onClick={() => onLogTimeClick(ticket)}>
+          <Timer className="mr-2 h-4 w-4" /> Log Time
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};

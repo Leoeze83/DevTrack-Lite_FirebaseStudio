@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -18,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { type ForwardedRef } from 'react';
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -533,8 +535,23 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
+// Helper for merging refs
+function useComposedRefs<T>(...refs: (ForwardedRef<T> | null | undefined)[]) {
+  return React.useCallback((node: T) => {
+    for (const ref of refs) {
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref != null) {
+        (ref as React.MutableRefObject<T | null>).current = node;
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, refs);
+}
+
+
 const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement,
+  HTMLButtonElement, // The primary ref type if not asChild
   React.ComponentProps<"button"> & {
     asChild?: boolean
     isActive?: boolean
@@ -549,45 +566,89 @@ const SidebarMenuButton = React.forwardRef<
       size = "default",
       tooltip,
       className,
-      ...props
+      children: originalChildren,
+      ...restProps
     },
-    ref
+    ref // This ref is ForwardedRef<HTMLButtonElement>
   ) => {
-    const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
 
-    const button = (
-      <Comp
-        ref={ref}
-        data-sidebar="menu-button"
-        data-size={size}
-        data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        {...props}
-      />
-    )
+    if (asChild && tooltip) {
+      const childElement = React.Children.only(originalChildren) as React.ReactElement<any, string | React.JSXElementConstructor<any>>;
+      const childProps = childElement.props || {};
 
-    if (!tooltip) {
-      return button
-    }
+      // When cloning the child (e.g., next/link), we avoid forcing SidebarMenuButton's
+      // HTMLButtonElement ref onto it if it's potentially incompatible.
+      // The child's own ref (from childProps.ref) will be preserved if it exists.
+      // TooltipTrigger asChild will then apply its own ref.
+      const styledAndProppedChild = React.cloneElement(
+        childElement,
+        {
+          // Explicitly OMIT `ref: ref` or `ref: useComposedRefs(...)` here.
+          // The original child's ref (if any, via childProps.ref) is preserved.
+          // SidebarMenuButton's own ref is not applied to the child in this specific path.
+          "data-sidebar": "menu-button",
+          "data-size": size,
+          "data-active": isActive,
+          className: cn(sidebarMenuButtonVariants({ variant, size }), className, childProps.className),
+          ...childProps, // Spread child's original props (including its own ref if any)
+          ...restProps, // Spread SidebarMenuButton's other props
+        }
+      );
 
-    if (typeof tooltip === "string") {
-      tooltip = {
-        children: tooltip,
+      const tooltipContent = typeof tooltip === "string" ? { children: tooltip } : tooltip;
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {styledAndProppedChild}
+          </TooltipTrigger>
+          <TooltipContent
+            side="right"
+            align="center"
+            hidden={state !== "collapsed" || isMobile}
+            {...tooltipContent}
+          />
+        </Tooltip>
+      );
+
+    } else { // Handles: (1) !asChild (tooltip or not), (2) asChild && !tooltip
+      const Comp = asChild ? Slot : "button";
+      const buttonElement = (
+        <Comp
+          ref={ref} // Slot handles ref merging correctly if asChild; otherwise, it's a button ref
+          data-sidebar="menu-button"
+          data-size={size}
+          data-active={isActive}
+          className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+          {...restProps}
+        >
+          {originalChildren}
+        </Comp>
+      );
+
+      if (!tooltip || (asChild && !tooltip) ) { // No tooltip if (asChild && !tooltip) because Slot handles it
+        return buttonElement;
       }
-    }
 
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent
-          side="right"
-          align="center"
-          hidden={state !== "collapsed" || isMobile}
-          {...tooltip}
-        />
-      </Tooltip>
-    )
+      const tooltipContent = typeof tooltip === "string" ? { children: tooltip } : tooltip;
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild={Comp === Slot}> 
+            {/* Important: asChild for TooltipTrigger only if Comp is Slot */}
+            {/* If Comp is 'button', buttonElement is the trigger itself */}
+            {buttonElement}
+          </TooltipTrigger>
+          <TooltipContent
+            side="right"
+            align="center"
+            hidden={Comp === Slot ? (state !== "collapsed" || isMobile) : isMobile} // Adjust hidden logic for Slot
+            {...tooltipContent}
+          />
+        </Tooltip>
+      );
+    }
   }
 )
 SidebarMenuButton.displayName = "SidebarMenuButton"
@@ -761,3 +822,4 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
