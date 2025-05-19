@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { FC } from "react";
@@ -9,8 +10,25 @@ import { LogTimeDialog } from "./log-time-dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+// Mapeo de status a español para filtros
+const statusFilterTranslations: Record<Status | "all", string> = {
+  all: "Todos los Estados",
+  Open: "Abierto",
+  "In Progress": "En Progreso",
+  Pending: "Pendiente",
+  Resolved: "Resuelto",
+  Closed: "Cerrado",
+};
+
+const priorityFilterTranslations: Record<Ticket["priority"] | "all", string> = {
+  all: "Todas las Prioridades",
+  low: "Baja",
+  medium: "Media",
+  high: "Alta",
+}
 
 export const TicketList: FC = () => {
   const { tickets, logTimeForTicket, updateTicketStatus, isInitialized } = useTicketStore();
@@ -65,33 +83,29 @@ export const TicketList: FC = () => {
     <div className="space-y-6">
        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Input 
-          placeholder="Search tickets..." 
+          placeholder="Buscar tickets..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="md:col-span-1"
         />
         <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as Status | "all")}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Filter by status" />
+            <SelectValue placeholder="Filtrar por estado" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="Open">Open</SelectItem>
-            <SelectItem value="In Progress">In Progress</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Resolved">Resolved</SelectItem>
-            <SelectItem value="Closed">Closed</SelectItem>
+            {(Object.keys(statusFilterTranslations) as Array<Status | "all">).map(key => (
+              <SelectItem key={key} value={key}>{statusFilterTranslations[key]}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={filterPriority} onValueChange={(value) => setFilterPriority(value as Ticket["priority"] | "all")}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Filter by priority" />
+            <SelectValue placeholder="Filtrar por prioridad" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Priorities</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
+            {(Object.keys(priorityFilterTranslations) as Array<Ticket["priority"] | "all">).map(key => (
+              <SelectItem key={key} value={key}>{priorityFilterTranslations[key]}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -99,9 +113,9 @@ export const TicketList: FC = () => {
       {filteredTickets.length === 0 ? (
          <Alert variant="default" className="bg-accent/10 border-accent/30">
           <Info className="h-5 w-5 text-accent" />
-          <AlertTitle>No Tickets Found</AlertTitle>
+          <AlertTitle>No se encontraron Tickets</AlertTitle>
           <AlertDescription>
-            There are no tickets matching your current filters, or no tickets have been created yet. Try adjusting your search or creating a new ticket.
+            No hay tickets que coincidan con tus filtros actuales, o aún no se han creado tickets. Intenta ajustar tu búsqueda o crea un nuevo ticket.
           </AlertDescription>
         </Alert>
       ) : (
@@ -136,4 +150,3 @@ const CardContent: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, class
 const CardFooter: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
   <div className={`flex items-center p-6 pt-0 ${className}`} {...props}>{children}</div>
 );
-

@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { FC } from "react";
@@ -21,10 +22,10 @@ import { useRouter } from "next/navigation";
 
 
 const ticketFormSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters long.").max(100),
-  description: z.string().min(10, "Description must be at least 10 characters long.").max(1000),
-  category: z.string().min(1, "Category is required.").max(50),
-  priority: z.enum(["low", "medium", "high"], { required_error: "Priority is required." }),
+  title: z.string().min(5, "El título debe tener al menos 5 caracteres.").max(100),
+  description: z.string().min(10, "La descripción debe tener al menos 10 caracteres.").max(1000),
+  category: z.string().min(1, "La categoría es obligatoria.").max(50),
+  priority: z.enum(["low", "medium", "high"], { required_error: "La prioridad es obligatoria." }),
 });
 
 type TicketFormValues = z.infer<typeof ticketFormSchema>;
@@ -49,8 +50,8 @@ export const TicketForm: FC = () => {
     const description = form.getValues("description");
     if (!description.trim()) {
       toast({
-        title: "Cannot Categorize",
-        description: "Please enter a description first.",
+        title: "No se puede categorizar",
+        description: "Por favor, ingresa una descripción primero.",
         variant: "destructive",
       });
       return;
@@ -60,7 +61,7 @@ export const TicketForm: FC = () => {
       const result = await categorizeTicketDescription(description);
       if ("error" in result) {
         toast({
-          title: "AI Categorization Failed",
+          title: "Falló la Categorización IA",
           description: result.error,
           variant: "destructive",
         });
@@ -68,14 +69,14 @@ export const TicketForm: FC = () => {
         form.setValue("category", result.category, { shouldValidate: true });
         form.setValue("priority", result.priority, { shouldValidate: true });
         toast({
-          title: "AI Categorization Successful",
-          description: `Category set to "${result.category}" and priority to "${result.priority}".`,
+          title: "Categorización IA Exitosa",
+          description: `Categoría establecida a "${result.category}" y prioridad a "${result.priority}".`,
         });
       }
     } catch (error) {
        toast({
-          title: "AI Categorization Error",
-          description: "An unexpected error occurred.",
+          title: "Error en Categorización IA",
+          description: "Ocurrió un error inesperado.",
           variant: "destructive",
         });
     } finally {
@@ -86,8 +87,8 @@ export const TicketForm: FC = () => {
   const onSubmit = (data: TicketFormValues) => {
     const newTicket = addTicket(data);
     toast({
-      title: "Ticket Created!",
-      description: `Ticket "${newTicket.title}" has been successfully created.`,
+      title: "¡Ticket Creado!",
+      description: `El ticket "${newTicket.title}" ha sido creado exitosamente.`,
     });
     form.reset();
     router.push("/"); // Navigate to dashboard after creation
@@ -96,8 +97,8 @@ export const TicketForm: FC = () => {
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-xl">
       <CardHeader>
-        <CardTitle>Create New Support Ticket</CardTitle>
-        <CardDescription>Fill in the details below to submit a new ticket. Use the AI categorize feature for help!</CardDescription>
+        <CardTitle>Crear Nuevo Ticket de Soporte</CardTitle>
+        <CardDescription>Completa los detalles a continuación para enviar un nuevo ticket. ¡Usa la función de categorización IA para ayudarte!</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -107,9 +108,9 @@ export const TicketForm: FC = () => {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Login issue on mobile app" {...field} />
+                    <Input placeholder="ej: Problema de inicio de sesión en la app móvil" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,12 +121,12 @@ export const TicketForm: FC = () => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Descripción</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Describe the issue in detail..." {...field} rows={5} />
+                    <Textarea placeholder="Describe el problema en detalle..." {...field} rows={5} />
                   </FormControl>
                   <FormDescription>
-                    The more detail you provide, the faster we can help.
+                    Cuanta más información proporciones, más rápido podremos ayudarte.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -138,7 +139,7 @@ export const TicketForm: FC = () => {
               ) : (
                 <Wand2 className="mr-2 h-4 w-4" />
               )}
-              AI Auto-Categorize & Prioritize
+              IA Auto-Categorizar y Priorizar
             </Button>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -147,12 +148,12 @@ export const TicketForm: FC = () => {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Categoría</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Bug Report, Feature Request" {...field} />
+                      <Input placeholder="ej: Reporte de Bug, Solicitud de Característica" {...field} />
                     </FormControl>
                     <FormDescription>
-                      AI suggestion or manual input.
+                      Sugerencia IA o entrada manual.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -163,21 +164,21 @@ export const TicketForm: FC = () => {
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority</FormLabel>
+                    <FormLabel>Prioridad</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
+                          <SelectValue placeholder="Seleccionar prioridad" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="low">Baja</SelectItem>
+                        <SelectItem value="medium">Media</SelectItem>
+                        <SelectItem value="high">Alta</SelectItem>
                       </SelectContent>
                     </Select>
                      <FormDescription>
-                      AI suggestion or manual input.
+                      Sugerencia IA o entrada manual.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -188,7 +189,7 @@ export const TicketForm: FC = () => {
           <CardFooter>
             <Button type="submit" className="w-full sm:w-auto ml-auto" disabled={form.formState.isSubmitting || isCategorizing}>
               {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Create Ticket
+              Crear Ticket
             </Button>
           </CardFooter>
         </form>

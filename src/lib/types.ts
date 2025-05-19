@@ -1,3 +1,4 @@
+
 export type Priority = "low" | "medium" | "high";
 export type Status = "Open" | "In Progress" | "Pending" | "Resolved" | "Closed";
 
@@ -21,4 +22,12 @@ export interface TimeLog {
   durationMinutes: number;
   notes?: string;
   loggedAt: string; // ISO string
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string; // ISO string
+  // Podríamos añadir 'updatedAt', 'role', etc. en el futuro
 }

@@ -1,3 +1,4 @@
+
 // use server'
 
 /**
@@ -17,9 +18,9 @@ const CategorizeTicketInputSchema = z.object({
 export type CategorizeTicketInput = z.infer<typeof CategorizeTicketInputSchema>;
 
 const CategorizeTicketOutputSchema = z.object({
-  tags: z.array(z.string()).describe('Tags associated with the ticket.'),
-  category: z.string().describe('The category of the ticket.'),
-  priority: z.enum(['low', 'medium', 'high']).describe('The priority of the ticket.'),
+  tags: z.array(z.string()).describe('Etiquetas asociadas al ticket.'),
+  category: z.string().describe('La categoría del ticket.'),
+  priority: z.enum(['low', 'medium', 'high']).describe('La prioridad del ticket (baja, media, alta).'),
 });
 export type CategorizeTicketOutput = z.infer<typeof CategorizeTicketOutputSchema>;
 
@@ -31,6 +32,8 @@ const prompt = ai.definePrompt({
   name: 'categorizeTicketPrompt',
   input: {schema: CategorizeTicketInputSchema},
   output: {schema: CategorizeTicketOutputSchema},
+  // El prompt se mantiene en inglés por ahora para asegurar la calidad de respuesta del modelo.
+  // Se puede traducir si es necesario, pero podría requerir ajustes.
   prompt: `You are an expert support ticket triage agent.
 
   Analyze the content of the support ticket to automatically tag, categorize, and assign priority using keyword recognition.

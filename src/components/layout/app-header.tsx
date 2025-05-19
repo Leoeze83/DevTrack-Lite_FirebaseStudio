@@ -1,3 +1,4 @@
+
 "use client";
 import type { FC } from "react";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
@@ -18,7 +19,7 @@ export const AppHeader: FC = () => {
         {!isMobile && <SidebarTrigger asChild>
             <Button variant="outline" size="icon" className="rounded-full">
                 <PanelLeftOpen className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
+                <span className="sr-only">Alternar Menú</span>
             </Button>
         </SidebarTrigger>}
       </div>

@@ -13,19 +13,10 @@ export default function SettingsPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Leer el tema desde localStorage al montar el componente
     const storedTheme = localStorage.getItem("theme");
     if (storedTheme) {
       setIsDarkMode(storedTheme === "dark");
     } else {
-      // Opcional: detectar preferencia del sistema si no hay nada en localStorage
-      // const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      // setIsDarkMode(prefersDark);
-      // localStorage.setItem("theme", prefersDark ? "dark" : "light");
-      // if (prefersDark) {
-      //   document.documentElement.classList.add("dark");
-      // }
-      // Por simplicidad, si no hay nada, se asume light
       setIsDarkMode(false);
       localStorage.setItem("theme", "light");
     }
@@ -52,7 +43,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="username">Nombre de Usuario</Label>
+            <Label htmlFor="username">Nombre de usuario</Label>
             <Input id="username" placeholder="Tu nombre de usuario" defaultValue="DevUser" />
           </div>
           
@@ -63,15 +54,15 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <Label htmlFor="email-notifications" className="text-base">
-                  Notificaciones por Email
+                  Notificaciones por correo electrónico
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Recibe actualizaciones por email para eventos importantes.
+                  Recibe actualizaciones por correo electrónico para eventos importantes.
                 </p>
               </div>
               <Switch
                 id="email-notifications"
-                aria-label="Activar notificaciones por email"
+                aria-label="Activar notificaciones por correo electrónico"
               />
             </div>
             <div className="flex items-center justify-between rounded-lg border p-4">

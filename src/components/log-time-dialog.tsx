@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { FC } from "react";
@@ -36,8 +37,7 @@ export const LogTimeDialog: FC<LogTimeDialogProps> = ({
     if (!ticket || !duration) return;
     const durationMinutes = parseInt(duration, 10);
     if (isNaN(durationMinutes) || durationMinutes <= 0) {
-      // Basic validation, can be improved
-      alert("Please enter a valid duration in minutes.");
+      alert("Por favor, ingresa una duración válida en minutos.");
       return;
     }
     onLogTime(ticket.id, durationMinutes, notes);
@@ -52,15 +52,15 @@ export const LogTimeDialog: FC<LogTimeDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Log Time for Ticket: {ticket.title}</DialogTitle>
+          <DialogTitle>Registrar Tiempo para Ticket: {ticket.title}</DialogTitle>
           <DialogDescription>
-            Enter the time spent and any relevant notes for this task.
+            Ingresa el tiempo dedicado y cualquier nota relevante para esta tarea.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="duration" className="text-right">
-              Duration (min)
+              Duración (min)
             </Label>
             <Input
               id="duration"
@@ -68,25 +68,25 @@ export const LogTimeDialog: FC<LogTimeDialogProps> = ({
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               className="col-span-3"
-              placeholder="e.g., 30"
+              placeholder="ej: 30"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="notes" className="text-right">
-              Notes
+              Notas
             </Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="col-span-3"
-              placeholder="Optional notes about the work done"
+              placeholder="Notas opcionales sobre el trabajo realizado"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button type="submit" onClick={handleSubmit}>Log Time</Button>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button type="submit" onClick={handleSubmit}>Registrar Tiempo</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

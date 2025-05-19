@@ -1,3 +1,4 @@
+
 "use server";
 
 import { categorizeTicket as aiCategorizeTicket, CategorizeTicketInput } from "@/ai/flows/categorize-ticket";
@@ -11,11 +12,10 @@ export interface CategorizationResult {
 
 export async function categorizeTicketDescription(description: string): Promise<CategorizationResult | { error: string }> {
   if (!description || !description.trim()) {
-    return { error: "Description cannot be empty." };
+    return { error: "La descripción no puede estar vacía." };
   }
   try {
     const input: CategorizeTicketInput = { ticketContent: description };
-    // The AI flow might return priority as a string that needs to be cast to Priority type
     const result = await aiCategorizeTicket(input);
     
     let finalPriority: Priority;
@@ -23,8 +23,7 @@ export async function categorizeTicketDescription(description: string): Promise<
     if (aiPriority === 'low' || aiPriority === 'medium' || aiPriority === 'high') {
       finalPriority = aiPriority as Priority;
     } else {
-      // Default or handle unrecognized priority
-      console.warn(`AI returned unrecognized priority: ${result.priority}. Defaulting to medium.`);
+      console.warn(`La IA devolvió una prioridad no reconocida: ${result.priority}. Se usará 'media' por defecto.`);
       finalPriority = 'medium'; 
     }
 
@@ -35,8 +34,7 @@ export async function categorizeTicketDescription(description: string): Promise<
     };
   } catch (error) {
     console.error("Error categorizing ticket:", error);
-    // Check if error is an instance of Error to safely access message
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    return { error: `Failed to categorize ticket using AI: ${errorMessage}` };
+    const errorMessage = error instanceof Error ? error.message : "Ocurrió un error desconocido";
+    return { error: `Error al categorizar el ticket usando IA: ${errorMessage}` };
   }
 }

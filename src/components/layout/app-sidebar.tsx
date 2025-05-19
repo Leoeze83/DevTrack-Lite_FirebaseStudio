@@ -1,3 +1,4 @@
+
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,13 +13,16 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { TicketCheck, LayoutDashboard, PlusSquare, List, Settings, LogOut } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { TicketCheck, LayoutDashboard, PlusSquare, List, Settings, LogOut, Users } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/tickets/create", label: "Create Ticket", icon: PlusSquare },
-  { href: "/tickets", label: "All Tickets", icon: List },
+  { href: "/", label: "Panel Principal", icon: LayoutDashboard },
+  { href: "/tickets/create", label: "Crear Ticket", icon: PlusSquare },
+  { href: "/tickets", label: "Todos los Tickets", icon: List },
+];
+
+const adminNavItems = [
+  { href: "/admin/users", label: "Gestión de Usuarios", icon: Users },
 ];
 
 export const AppSidebar: FC = () => {
@@ -51,26 +55,45 @@ export const AppSidebar: FC = () => {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
+        <SidebarMenu className="mt-4 pt-4 border-t border-sidebar-border">
+           <SidebarMenuItem>
+             <span className="px-2 text-xs font-semibold text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">Admin</span>
+           </SidebarMenuItem>
+          {adminNavItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith(item.href)} // Use startsWith for parent routes
+                tooltip={{ children: item.label, className: "ml-2"}}
+              >
+                <Link href={item.href}>
+                  <item.icon />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-2 border-t border-sidebar-border">
          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton 
                 asChild 
-                tooltip={{ children: "Settings", className: "ml-2"}}
+                tooltip={{ children: "Configuración", className: "ml-2"}}
                 isActive={pathname === "/settings"}
               >
                 <Link href="/settings">
                   <Settings />
-                  <span>Settings</span>
+                  <span>Configuración</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={{ children: "Logout", className: "ml-2"}} variant="outline">
-                <Link href="#">
+              <SidebarMenuButton asChild tooltip={{ children: "Cerrar Sesión", className: "ml-2"}} variant="outline">
+                <Link href="#"> {/* Mantener href="#" por ahora, ya que no hay lógica de auth */}
                   <LogOut />
-                  <span>Logout</span>
+                  <span>Cerrar Sesión</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { FC } from "react";
@@ -7,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Archive, CheckCircle2, CircleDot, Clock, HelpCircle, LoaderCircle, MoreVertical, PauseCircle, Timer } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale"; // Importar locale español
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface TicketListItemProps {
@@ -31,6 +33,15 @@ const statusColors: Record<Status, string> = {
   Closed: "bg-gray-100 text-gray-700",
 };
 
+// Mapeo de status a español para el Dropdown
+const statusTranslations: Record<Status, string> = {
+  Open: "Abierto",
+  "In Progress": "En Progreso",
+  Pending: "Pendiente",
+  Resolved: "Resuelto",
+  Closed: "Cerrado",
+};
+
 
 export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick, onUpdateStatus }) => {
   const availableStatuses: Status[] = ["Open", "In Progress", "Pending", "Resolved", "Closed"];
@@ -49,7 +60,7 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
             <DropdownMenuContent align="end">
               {availableStatuses.map(status => (
                 <DropdownMenuItem key={status} onClick={() => onUpdateStatus(ticket.id, status)} disabled={ticket.status === status}>
-                  Set as {status}
+                  Marcar como {statusTranslations[status]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -63,22 +74,22 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
         <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                <span>Created {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true })}</span>
+                <span>Creado {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: es })}</span>
             </div>
             {ticket.updatedAt !== ticket.createdAt && (
                  <div className="flex items-center gap-1">
-                    <span>Updated {formatDistanceToNow(new Date(ticket.updatedAt), { addSuffix: true })}</span>
+                    <span>Actualizado {formatDistanceToNow(new Date(ticket.updatedAt), { addSuffix: true, locale: es })}</span>
                 </div>
             )}
         </div>
          <div className="flex flex-wrap gap-2 items-center">
           <Badge variant="outline" className={`flex items-center gap-1.5 ${statusColors[ticket.status]}`}>
             {statusIcons[ticket.status]}
-            {ticket.status}
+            {statusTranslations[ticket.status]} {/* Mostrar status traducido */}
           </Badge>
           <Badge variant="secondary">{ticket.category}</Badge>
           <Badge variant={ticket.priority === "high" ? "destructive" : ticket.priority === "medium" ? "outline" : "default" } className={ticket.priority === "medium" ? "border-yellow-500 text-yellow-600" : ""}>
-            Priority: {ticket.priority}
+            Prioridad: {ticket.priority === "low" ? "Baja" : ticket.priority === "medium" ? "Media" : "Alta"}
           </Badge>
         </div>
         {ticket.tags && ticket.tags.length > 0 && (
@@ -89,10 +100,10 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
       </CardContent>
       <CardFooter className="flex justify-between items-center">
         <div className="text-sm text-muted-foreground">
-            Logged: {(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs
+            Registrado: {(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs
         </div>
         <Button size="sm" onClick={() => onLogTimeClick(ticket)}>
-          <Timer className="mr-2 h-4 w-4" /> Log Time
+          <Timer className="mr-2 h-4 w-4" /> Registrar Tiempo
         </Button>
       </CardFooter>
     </Card>
