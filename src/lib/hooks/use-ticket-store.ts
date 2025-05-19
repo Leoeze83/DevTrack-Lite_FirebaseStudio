@@ -43,30 +43,40 @@ const sampleDescriptions = [
   "Se necesita la traducción completa de la interfaz de usuario al idioma francés."
 ];
 
-const sampleCategories = ["Bug", "Mejora", "Funcionalidad Nueva", "Soporte Técnico", "Diseño UI/UX", "Rendimiento", "Seguridad"];
+const sampleCategories = ["Bug", "Mejora", "Funcionalidad Nueva", "Soporte Técnico", "Diseño UI/UX", "Rendimiento", "Seguridad", "Despliegue", "Base de Datos"];
 const samplePriorities: Priority[] = ["low", "medium", "high"];
 const sampleStatuses: Status[] = ["Open", "In Progress", "Pending", "Resolved", "Closed"];
-const sampleTags = [["login", "mobile"], ["ui", "admin"], ["export", "csv"], ["filter", "product"], ["form", "bug"], ["performance", "images"], ["browser", "firefox"], ["pagination", "orders"], ["payment", "error"], ["design", "ux"], ["security", "update"], ["api", "performance"], ["push", "ios"], ["design", "theme"], ["search", "catalog"], ["billing", "bug"], ["testing", "chat"], ["video", "bug"], ["validation", "profile"], ["translation", "i18n"]];
+const sampleTags = [
+    ["login", "mobile", "auth"], ["ui", "admin", "dashboard"], ["export", "csv", "report"], ["filter", "product", "backend"], 
+    ["form", "bug", "validation"], ["performance", "images", "frontend"], ["browser", "firefox", "css"], ["pagination", "orders", "list"],
+    ["payment", "error", "stripe"], ["design", "ux", "onboarding"], ["security", "update", "vulnerability"], ["api", "performance", "database"], 
+    ["push", "ios", "notification"], ["design", "theme", "colors"], ["search", "catalog", "elasticsearch"], ["billing", "bug", "calculation"], 
+    ["testing", "chat", "qa"], ["video", "bug", "multimedia"], ["validation", "profile", "frontend"], ["translation", "i18n", "localization"]
+];
+
 
 function generateRandomTicket(index: number): Ticket {
-  const createdAt = new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString();
-  const status = sampleStatuses[Math.floor(Math.random() * sampleStatuses.length)];
-  let updatedAt = createdAt;
-  if (Math.random() > 0.5) {
-    updatedAt = new Date(new Date(createdAt).getTime() + Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000).toISOString();
-  }
-  const timeLoggedMinutes = status === "Closed" || status === "Resolved" ? Math.floor(Math.random() * 300) : Math.floor(Math.random() * 60);
+  const createdAt = new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000);
+  const statusOptions = sampleStatuses;
+  const currentStatus = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+  
+  let updatedAt = new Date(createdAt.getTime() + Math.floor(Math.random() * (Date.now() - createdAt.getTime())) );
+  if (updatedAt < createdAt) updatedAt = createdAt; // Ensure updatedAt is not before createdAt
+
+  const timeLoggedMinutes = (currentStatus === "Resolved" || currentStatus === "Closed") 
+    ? Math.floor(Math.random() * 240) + 60 // 1 to 5 hours
+    : (currentStatus === "In Progress" ? Math.floor(Math.random() * 120) : Math.floor(Math.random()*30)); // 0 to 2 hours for In Progress, less for Open/Pending
 
   return {
     id: crypto.randomUUID(),
-    title: sampleTitles[index % sampleTitles.length] + (Math.random() > 0.7 ? ` (v${index})` : ""),
-    description: sampleDescriptions[index % sampleDescriptions.length],
-    category: sampleCategories[Math.floor(Math.random() * sampleCategories.length)],
-    priority: samplePriorities[Math.floor(Math.random() * samplePriorities.length)],
-    status: status,
-    createdAt: createdAt,
-    updatedAt: updatedAt,
-    tags: Math.random() > 0.5 ? sampleTags[index % sampleTags.length] : undefined,
+    title: sampleTitles[index % sampleTitles.length] + (Math.random() > 0.8 ? ` - Issue #${Math.floor(Math.random()*1000)}` : ""),
+    description: sampleDescriptions[index % sampleDescriptions.length] + (Math.random() > 0.5 ? " Se necesita atención urgente." : " Por favor, revisar cuando sea posible."),
+    category: sampleCategories[index % sampleCategories.length],
+    priority: samplePriorities[index % samplePriorities.length],
+    status: currentStatus,
+    createdAt: createdAt.toISOString(),
+    updatedAt: updatedAt.toISOString(),
+    tags: Math.random() > 0.3 ? sampleTags[index % sampleTags.length].slice(0, Math.floor(Math.random() * sampleTags[index % sampleTags.length].length) + 1) : undefined,
     timeLoggedMinutes: timeLoggedMinutes,
   };
 }
@@ -74,14 +84,40 @@ function generateRandomTicket(index: number): Ticket {
 
 function getInitialTickets(): Ticket[] {
   if (typeof window === "undefined") return [];
-  const storedTickets = localStorage.getItem(TICKETS_STORAGE_KEY);
-  if (storedTickets) {
-    return JSON.parse(storedTickets);
+  
+  const storedTicketsString = localStorage.getItem(TICKETS_STORAGE_KEY);
+  let ticketsFromStorage: Ticket[] = [];
+
+  if (storedTicketsString) {
+    try {
+      const parsed = JSON.parse(storedTicketsString);
+      if (Array.isArray(parsed)) {
+        // Quick validation for ticket structure (can be more thorough)
+        if (parsed.every(t => typeof t === 'object' && t !== null && 'id' in t && 'title' in t)) {
+            ticketsFromStorage = parsed;
+        } else if (parsed.length > 0) { // If it's an array but not of tickets
+            console.warn("Stored data in localStorage is an array but not of valid tickets. Discarding.");
+            localStorage.removeItem(TICKETS_STORAGE_KEY);
+        }
+        // If parsed is an empty array, ticketsFromStorage remains []
+      } else {
+        console.warn("Stored tickets data was not an array. Discarding.");
+        localStorage.removeItem(TICKETS_STORAGE_KEY); // Clear invalid data
+      }
+    } catch (e) {
+      console.error("Error parsing tickets from localStorage. Discarding.", e);
+      localStorage.removeItem(TICKETS_STORAGE_KEY); // Clear corrupted data
+    }
   }
-  // Si no hay tickets, generamos 20 de ejemplo
-  const exampleTickets = Array.from({ length: 20 }, (_, i) => generateRandomTicket(i));
-  localStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(exampleTickets));
-  return exampleTickets;
+
+  // If no tickets were loaded from storage (it was null, empty, parsing failed, or data was invalid)
+  if (ticketsFromStorage.length === 0) {
+    const exampleTickets = Array.from({ length: 20 }, (_, i) => generateRandomTicket(i));
+    localStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(exampleTickets));
+    return exampleTickets.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  return ticketsFromStorage.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 function getInitialTimeLogs(): TimeLog[] {
