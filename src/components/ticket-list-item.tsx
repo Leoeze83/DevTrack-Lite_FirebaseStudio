@@ -2,6 +2,7 @@
 "use client";
 
 import type { FC } from "react";
+import * as React from "react"; // Import React
 import type { Ticket, Status } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,19 +19,19 @@ interface TicketListItemProps {
 }
 
 const statusIcons: Record<Status, JSX.Element> = {
-  Open: <CircleDot className="h-4 w-4" />,
-  "In Progress": <LoaderCircle className="h-4 w-4 animate-spin" />,
-  Pending: <PauseCircle className="h-4 w-4" />,
-  Resolved: <CheckCircle2 className="h-4 w-4" />,
-  Closed: <Archive className="h-4 w-4" />,
+  Open: <CircleDot />,
+  "In Progress": <LoaderCircle className="animate-spin" />,
+  Pending: <PauseCircle />,
+  Resolved: <CheckCircle2 />,
+  Closed: <Archive />,
 };
 
 const statusColors: Record<Status, string> = {
-  Open: "bg-blue-100 text-blue-700 border-blue-300",
-  "In Progress": "bg-yellow-100 text-yellow-700 border-yellow-300",
-  Pending: "bg-orange-100 text-orange-700 border-orange-300",
-  Resolved: "bg-green-100 text-green-700 border-green-300",
-  Closed: "bg-gray-100 text-gray-700 border-gray-300",
+  Open: "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200",
+  "In Progress": "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200",
+  Pending: "bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200",
+  Resolved: "bg-green-100 text-green-700 border-green-300 hover:bg-green-200",
+  Closed: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200",
 };
 
 // Mapeo de status a español para el Dropdown y el Badge
@@ -56,7 +57,7 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col h-full">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg mb-1">{ticket.title}</CardTitle>
+          <CardTitle className="text-lg mb-1 line-clamp-2">{ticket.title}</CardTitle>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
@@ -66,18 +67,24 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {availableStatuses.map(status => (
-                <DropdownMenuItem key={status} onClick={() => onUpdateStatus(ticket.id, status)} disabled={ticket.status === status}>
-                  {statusIcons[status]} <span className="ml-2">Marcar como {statusTranslations[status]}</span>
+                <DropdownMenuItem 
+                  key={status} 
+                  onClick={() => onUpdateStatus(ticket.id, status)} 
+                  disabled={ticket.status === status}
+                  className="text-sm"
+                >
+                  {React.cloneElement(statusIcons[status], { className: `mr-2 h-4 w-4` })} 
+                  <span>Marcar como {statusTranslations[status]}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <CardDescription className="text-sm text-muted-foreground line-clamp-2">
+        <CardDescription className="text-sm text-muted-foreground line-clamp-3 min-h-[3.75rem]"> {/* Ajustar min-h según necesidad para 3 líneas */}
           {ticket.description}
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3 flex-grow">
+      <CardContent className="space-y-3 flex-grow pb-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
@@ -90,25 +97,29 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
             )}
         </div>
          <div className="flex flex-wrap gap-2 items-center">
-          <Badge variant="outline" className={`flex items-center gap-1.5 py-1 px-2.5 text-xs ${statusColors[ticket.status]}`}>
+          <Badge variant="outline" className={`flex items-center gap-1 py-0.5 px-2 text-xs font-medium ${statusColors[ticket.status]}`}>
             {React.cloneElement(statusIcons[ticket.status], { className: `h-3.5 w-3.5` })}
             {statusTranslations[ticket.status]}
           </Badge>
-          <Badge variant="secondary" className="py-1 px-2.5 text-xs">{ticket.category}</Badge>
+          <Badge variant="secondary" className="py-0.5 px-2 text-xs">{ticket.category}</Badge>
           <Badge 
-            variant={ticket.priority === "high" ? "destructive" : ticket.priority === "medium" ? "outline" : "default" } 
-            className={`py-1 px-2.5 text-xs ${ticket.priority === "medium" ? "border-yellow-500 text-yellow-600 bg-yellow-50" : ticket.priority === "low" ? "bg-sky-100 text-sky-700 border-sky-300" : ""}`}
+            variant={ticket.priority === "high" ? "destructive" : ticket.priority === "medium" ? "outline" : "default"} 
+            className={`py-0.5 px-2 text-xs ${
+              ticket.priority === "high" ? "bg-red-100 text-red-700 border-red-300 hover:bg-red-200" 
+              : ticket.priority === "medium" ? "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200" 
+              : "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200"
+            }`}
           >
             Prioridad: {priorityTranslations[ticket.priority]}
           </Badge>
         </div>
         {ticket.tags && ticket.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {ticket.tags.map(tag => <Badge key={tag} variant="outline" className="text-xs font-normal bg-muted/50">{tag}</Badge>)}
+            {ticket.tags.map(tag => <Badge key={tag} variant="outline" className="text-xs font-normal bg-muted/50 px-1.5 py-0.5">{tag}</Badge>)}
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between items-center pt-4">
+      <CardFooter className="flex justify-between items-center pt-4 border-t">
         <div className="text-sm text-muted-foreground">
             Registrado: {(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs
         </div>
