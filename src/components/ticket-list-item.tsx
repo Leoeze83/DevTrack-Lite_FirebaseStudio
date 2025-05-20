@@ -2,14 +2,14 @@
 "use client";
 
 import type { FC } from "react";
-import * as React from "react"; // Import React
+import * as React from "react"; 
 import type { Ticket, Status } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Archive, CheckCircle2, CircleDot, Clock, HelpCircle, LoaderCircle, MoreVertical, PauseCircle, Timer } from "lucide-react";
+import { Archive, CheckCircle2, CircleDot, Clock, LoaderCircle, MoreVertical, PauseCircle, Timer } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale"; // Importar locale español
+import { es } from "date-fns/locale"; 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface TicketListItemProps {
@@ -34,7 +34,6 @@ const statusColors: Record<Status, string> = {
   Closed: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200",
 };
 
-// Mapeo de status a español para el Dropdown y el Badge
 const statusTranslations: Record<Status, string> = {
   Open: "Abierto",
   "In Progress": "En Progreso",
@@ -47,7 +46,13 @@ const priorityTranslations: Record<Ticket["priority"], string> = {
   low: "Baja",
   medium: "Media",
   high: "Alta",
-}
+};
+
+const priorityBadgeColors: Record<Ticket["priority"], string> = {
+    high: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200",
+    medium: "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200",
+    low: "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200",
+};
 
 
 export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick, onUpdateStatus }) => {
@@ -80,7 +85,7 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <CardDescription className="text-sm text-muted-foreground line-clamp-2 min-h-[3rem]"> {/* Reducido a 2 líneas y ajustado min-h */}
+        <CardDescription className="text-sm text-muted-foreground line-clamp-2 min-h-[3rem]">
           {ticket.description}
         </CardDescription>
       </CardHeader>
@@ -97,18 +102,14 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
             )}
         </div>
          <div className="flex flex-wrap gap-2 items-center">
-          <Badge variant="outline" className={`flex items-center gap-1.5 py-1 px-2 text-xs ${statusColors[ticket.status]}`}> {/* Ajustado padding py y px */}
+          <Badge variant="outline" className={`flex items-center gap-1.5 py-1 px-2 text-xs ${statusColors[ticket.status]}`}>
             {React.cloneElement(statusIcons[ticket.status], { className: `h-3.5 w-3.5` })}
             {statusTranslations[ticket.status]}
           </Badge>
-          <Badge variant="secondary" className="py-1 px-2 text-xs">{ticket.category}</Badge> {/* Ajustado padding py y px */}
+          <Badge variant="secondary" className="py-1 px-2 text-xs">{ticket.category}</Badge>
           <Badge 
             variant={ticket.priority === "high" ? "destructive" : ticket.priority === "medium" ? "outline" : "default"} 
-            className={`py-1 px-2 text-xs ${ // Ajustado padding py y px
-              ticket.priority === "high" ? "bg-red-100 text-red-700 border-red-300 hover:bg-red-200" 
-              : ticket.priority === "medium" ? "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200" 
-              : "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200"
-            }`}
+            className={`py-1 px-2 text-xs ${priorityBadgeColors[ticket.priority]}`}
           >
             Prioridad: {priorityTranslations[ticket.priority]}
           </Badge>
@@ -119,17 +120,14 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between pt-4 border-t">
-        <div className="text-sm text-muted-foreground">
+      <CardFooter className="flex flex-col items-start gap-2 pt-4 border-t">
+        <div className="text-sm text-muted-foreground w-full">
             Registrado: {(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs
         </div>
-        <Button size="sm" onClick={() => onLogTimeClick(ticket)} className="w-full sm:w-auto"> {/* Botón ocupa todo el ancho en móvil */}
+        <Button size="sm" onClick={() => onLogTimeClick(ticket)} className="w-full">
           <Timer className="mr-2 h-4 w-4" /> Registrar Tiempo
         </Button>
       </CardFooter>
     </Card>
   );
 };
-
-
-    
