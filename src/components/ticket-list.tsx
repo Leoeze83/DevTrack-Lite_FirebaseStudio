@@ -49,20 +49,20 @@ const statusIcons: Record<Status, JSX.Element> = {
 };
 
 const statusColorsClasses: Record<Status, string> = {
-  Open: "bg-blue-100 text-blue-700 border-blue-300",
-  "In Progress": "bg-yellow-100 text-yellow-700 border-yellow-300",
-  Pending: "bg-orange-100 text-orange-700 border-orange-300",
-  Resolved: "bg-green-100 text-green-700 border-green-300",
-  Closed: "bg-gray-100 text-gray-700 border-gray-300",
+  Open: "bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700",
+  "In Progress": "bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700",
+  Pending: "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700",
+  Resolved: "bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700",
+  Closed: "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700/30 dark:text-gray-300 dark:border-gray-600",
 };
 
 const priorityBadgeColors: Record<Ticket["priority"], string> = {
-    high: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200",
-    medium: "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200",
-    low: "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200",
+    high: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700 dark:hover:bg-red-900/40",
+    medium: "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700 dark:hover:bg-yellow-900/40",
+    low: "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-700 dark:hover:bg-sky-900/40",
 };
 
-type SortableColumn = 'id'; // Expand later if needed for other columns
+type SortableColumn = 'id'; 
 
 export const TicketList: FC = () => {
   const { tickets, logTimeForTicket, updateTicketStatus, isInitialized } = useTicketStore();
@@ -121,7 +121,6 @@ export const TicketList: FC = () => {
   const availableStatuses: Status[] = ["Open", "In Progress", "Pending", "Resolved", "Closed"];
 
   if (!isInitialized) {
-    // Skeleton loading state (unchanged)
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -129,13 +128,16 @@ export const TicketList: FC = () => {
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
         </div>
-        <Skeleton className="h-10 w-24 mb-4" />
+        <div className="flex justify-end mb-4">
+            <Skeleton className="h-10 w-10 mr-2" />
+            <Skeleton className="h-10 w-10" />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => ( 
             <Card key={i} className="shadow-md">
               <CardHeader><Skeleton className="h-6 w-3/4 mb-2" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></CardHeader>
               <CardContent className="space-y-3"><Skeleton className="h-8 w-1/2" /><Skeleton className="h-6 w-3/4" /></CardContent>
-              <CardFooter className="flex justify-between items-center"><Skeleton className="h-8 w-1/4" /><Skeleton className="h-10 w-1/3" /></CardFooter>
+              <CardFooter className="flex flex-col items-start gap-2"><Skeleton className="h-4 w-1/3"/><Skeleton className="h-10 w-full" /></CardFooter>
             </Card>
           ))}
         </div>
@@ -204,16 +206,16 @@ export const TicketList: FC = () => {
        </div>
 
       {tickets.length === 0 ? (
-        <Alert variant="default" className="bg-sky-50 border-sky-300 text-sky-700">
-          <Info className="h-5 w-5 text-sky-600" />
+        <Alert variant="default" className="bg-sky-100 border-sky-300 text-sky-700 dark:bg-sky-900/30 dark:border-sky-700 dark:text-sky-300">
+          <Info className="h-5 w-5 text-sky-600 dark:text-sky-400" />
           <AlertTitle>No Hay Tickets Aún</AlertTitle>
           <AlertDescription>
             Parece que no hay tickets registrados en el sistema. ¡Crea tu primer ticket para empezar! (Se generarán 10 tickets de ejemplo en la primera carga si no hay datos existentes).
           </AlertDescription>
         </Alert>
       ) : sortedAndFilteredTickets.length === 0 ? (
-         <Alert variant="default" className="bg-amber-50 border-amber-300 text-amber-700">
-          <SearchX className="h-5 w-5 text-amber-600" />
+         <Alert variant="default" className="bg-amber-100 border-amber-300 text-amber-700 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-300">
+          <SearchX className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           <AlertTitle>No se Encontraron Tickets</AlertTitle>
           <AlertDescription>
             No hay tickets que coincidan con tus filtros actuales. Intenta ajustar tu búsqueda o los filtros aplicados.
@@ -235,7 +237,7 @@ export const TicketList: FC = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleSortChange('id')}
-                      className="font-semibold text-xs px-1 py-0.5 h-auto hover:bg-muted"
+                      className="font-semibold text-xs px-1 py-0.5 h-auto" // Se eliminó hover:bg-muted
                     >
                       ID
                       {renderSortArrow('id')}
@@ -335,3 +337,6 @@ export const TicketList: FC = () => {
     </div>
   );
 };
+
+
+    

@@ -55,49 +55,48 @@ body {
   }
 
   .dark {
-    /* Keeping dark theme variables as they were, can be adjusted later if needed */
     --background: 210 25% 15%; /* Darker blue/grey */
     --foreground: 208 100% 97%; /* Light blue */
 
-    --card: 210 25% 15%;
-    --card-foreground: 208 100% 97%;
+    --card: 210 25% 18%; /* Slightly lighter than background for card distinction */
+    --card-foreground: 208 95% 95%; /* Slightly off-white for card text */
 
-    --popover: 210 25% 15%;
+    --popover: 210 25% 12%; /* Even darker for popovers */
     --popover-foreground: 208 100% 97%;
 
-    --primary: 203 66% 63%; /* Calming Blue */
-    --primary-foreground: 0 0% 10%; /* Dark text for contrast */
+    --primary: 203 66% 63%; /* Calming Blue - can remain same or be adjusted */
+    --primary-foreground: 0 0% 10%; /* Dark text for contrast on primary */
 
-    --secondary: 203 50% 30%;
-    --secondary-foreground: 208 100% 97%;
+    --secondary: 203 50% 30%; /* Darker secondary */
+    --secondary-foreground: 208 90% 90%; /* Lighter text on secondary */
 
-    --muted: 210 25% 25%;
-    --muted-foreground: 208 80% 80%;
+    --muted: 210 25% 25%; /* Muted background, slightly darker */
+    --muted-foreground: 208 80% 80%; /* Lighter muted text */
 
-    --accent: 277 48% 62%; /* Vibrant Purple */
+    --accent: 277 55% 70%; /* Slightly brighter purple for dark mode */
     --accent-foreground: 0 0% 100%; /* White */
     
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 60% 50%; /* Slightly less saturated red for dark mode */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 210 25% 30%;
-    --input: 210 25% 30%;
-    --ring: 203 66% 63%;
+    --border: 210 25% 30%; /* Darker border */
+    --input: 210 25% 22%; /* Darker input background */
+    --ring: 203 66% 70%; /* Slightly brighter ring for focus */
 
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --chart-1: 12 70% 70%;
+    --chart-2: 173 50% 50%;
+    --chart-3: 197 40% 40%;
+    --chart-4: 43 70% 70%;
+    --chart-5: 27 80% 70%;
 
-    --sidebar-background: 210 25% 12%;
+    --sidebar-background: 210 25% 12%; /* Darker sidebar */
     --sidebar-foreground: 208 80% 90%;
     --sidebar-primary: 203 66% 63%;
     --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 277 48% 62%;
+    --sidebar-accent: 277 55% 70%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 210 25% 20%;
-    --sidebar-ring: 203 66% 63%;
+    --sidebar-ring: 203 66% 70%;
   }
 }
 
@@ -109,3 +108,5 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+    
