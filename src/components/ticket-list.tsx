@@ -10,7 +10,7 @@ import { LogTimeDialog } from "./log-time-dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Info, SearchX, LayoutGrid, List as ListIcon, MoreVertical, Timer, CircleDot, LoaderCircle, PauseCircle, CheckCircle2, Archive } from "lucide-react"; // SearchX para "no resultados"
+import { Info, SearchX, LayoutGrid, List as ListIcon, MoreVertical, Timer, CircleDot, LoaderCircle, PauseCircle, CheckCircle2, Archive, Edit } from "lucide-react"; 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,8 +19,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import * as React from "react";
+import Link from "next/link";
 
-// Mapeo de status a español para filtros y tabla
+
 const statusFilterTranslations: Record<Status | "all", string> = {
   all: "Todos los Estados",
   Open: "Abierto",
@@ -79,7 +80,7 @@ export const TicketList: FC = () => {
     setIsLogTimeDialogOpen(true);
   };
 
-  const handleLogTimeSubmit = (ticketId: string, durationMinutes: number, notes?: string) => {
+  const handleLogTimeSubmit = (ticketId: number, durationMinutes: number, notes?: string) => {
     logTimeForTicket(ticketId, durationMinutes, notes);
     setIsLogTimeDialogOpen(false);
     setSelectedTicket(null);
@@ -187,20 +188,24 @@ export const TicketList: FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[80px]">ID</TableHead>
+                <TableHead className="w-[60px]">ID</TableHead>
                 <TableHead>Título</TableHead>
                 <TableHead>Categoría</TableHead>
                 <TableHead>Prioridad</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Creado</TableHead>
-                <TableHead>Tiempo Reg.</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead className="w-[100px]">Tiempo Reg.</TableHead>
+                <TableHead className="text-right w-[120px]">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredTickets.map((ticket) => (
                 <TableRow key={ticket.id}>
-                  <TableCell className="font-medium text-xs">{ticket.id.substring(0, 8)}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/tickets/${ticket.id}/edit`} className="hover:text-primary hover:underline">
+                        #{ticket.id}
+                    </Link>
+                  </TableCell>
                   <TableCell className="max-w-xs truncate" title={ticket.title}>{ticket.title}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="text-xs">{ticket.category}</Badge>
@@ -223,10 +228,17 @@ export const TicketList: FC = () => {
                   <TableCell className="text-xs">{(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleLogTimeClick(ticket)}>
-                            <Timer className="h-4 w-4" />
-                            <span className="sr-only">Registrar Tiempo</span>
-                        </Button>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleLogTimeClick(ticket)}>
+                                        <Timer className="h-4 w-4" />
+                                        <span className="sr-only">Registrar Tiempo</span>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>Registrar Tiempo</p></TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                         <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -235,6 +247,12 @@ export const TicketList: FC = () => {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                             <DropdownMenuItem asChild>
+                               <Link href={`/tickets/${ticket.id}/edit`} className="text-sm w-full">
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Editar Ticket
+                               </Link>
+                             </DropdownMenuItem>
                             {availableStatuses.map(status => (
                             <DropdownMenuItem 
                                 key={status} 
@@ -267,17 +285,24 @@ export const TicketList: FC = () => {
 };
 
 // Dummy Card for Skeleton, si no se importa de ui/card
-const Card: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
-  <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`} {...props}>
-    {children}
-  </div>
-);
-const CardHeader: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
-  <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>{children}</div>
-);
-const CardContent: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
-  <div className={`p-6 pt-0 ${className}`} {...props}>{children}</div>
-);
-const CardFooter: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
-  <div className={`flex items-center p-6 pt-0 ${className}`} {...props}>{children}</div>
-);
+// const Card: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
+//   <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`} {...props}>
+//     {children}
+//   </div>
+// );
+// const CardHeader: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
+//   <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>{children}</div>
+// );
+// const CardContent: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
+//   <div className={`p-6 pt-0 ${className}`} {...props}>{children}</div>
+// );
+// const CardFooter: FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...props }) => (
+//   <div className={`flex items-center p-6 pt-0 ${className}`} {...props}>{children}</div>
+// );
+// Se eliminan los componentes dummy Card, CardHeader, etc. porque ya están importados de "@/components/ui/card"
+// o son proporcionados por shadcn/ui.
+// La importación de Skeleton, etc., también viene de shadcn/ui
+// Se importa TooltipProvider y TooltipContent de @/components/ui/tooltip para el botón de registrar tiempo en la tabla
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"; // Asegurar estas importaciones
+

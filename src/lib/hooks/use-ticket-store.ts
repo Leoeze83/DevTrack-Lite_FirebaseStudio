@@ -4,8 +4,8 @@
 import type { Ticket, TimeLog, Priority, Status } from "@/lib/types";
 import { useState, useEffect, useCallback } from "react";
 
-const TICKETS_STORAGE_KEY = "devtrack_tickets";
-const TIMELOGS_STORAGE_KEY = "devtrack_timelogs";
+const TICKETS_STORAGE_KEY = "devtrack_tickets_v2"; // Cambiada la clave para forzar reinicio si hay datos viejos con UUID
+const TIMELOGS_STORAGE_KEY = "devtrack_timelogs_v2";
 
 const sampleTitles = [
   "Error de inicio de sesión en la app móvil", "Mejora de UI para el dashboard de admin",
@@ -61,14 +61,14 @@ function generateRandomTicket(index: number): Ticket {
   const currentStatus = statusOptions[Math.floor(Math.random() * statusOptions.length)];
   
   let updatedAt = new Date(createdAt.getTime() + Math.floor(Math.random() * (Date.now() - createdAt.getTime())) );
-  if (updatedAt < createdAt) updatedAt = createdAt; // Ensure updatedAt is not before createdAt
+  if (updatedAt < createdAt) updatedAt = createdAt; 
 
   const timeLoggedMinutes = (currentStatus === "Resolved" || currentStatus === "Closed") 
-    ? Math.floor(Math.random() * 240) + 60 // 1 to 5 hours
-    : (currentStatus === "In Progress" ? Math.floor(Math.random() * 120) : Math.floor(Math.random()*30)); // 0 to 2 hours for In Progress, less for Open/Pending
+    ? Math.floor(Math.random() * 240) + 60 
+    : (currentStatus === "In Progress" ? Math.floor(Math.random() * 120) : Math.floor(Math.random()*30)); 
 
   return {
-    id: crypto.randomUUID(),
+    id: index + 1, // ID numérico secuencial para ejemplos
     title: sampleTitles[index % sampleTitles.length] + (Math.random() > 0.8 ? ` - Incidencia #${Math.floor(Math.random()*1000)}` : ""),
     description: sampleDescriptions[index % sampleDescriptions.length] + (Math.random() > 0.5 ? " Se necesita atención urgente." : " Por favor, revisar cuando sea posible."),
     category: sampleCategories[index % sampleCategories.length],
@@ -81,7 +81,6 @@ function generateRandomTicket(index: number): Ticket {
   };
 }
 
-
 function getInitialTickets(): Ticket[] {
   if (typeof window === "undefined") return [];
   
@@ -92,38 +91,35 @@ function getInitialTickets(): Ticket[] {
     try {
       const parsed = JSON.parse(storedTicketsString);
       if (Array.isArray(parsed)) {
-        // Quick validation for ticket structure (can be more thorough)
-        if (parsed.every(t => typeof t === 'object' && t !== null && 'id' in t && 'title' in t)) {
+        // Validación para IDs numéricos
+        if (parsed.every(t => typeof t === 'object' && t !== null && 'id' in t && typeof t.id === 'number' && 'title' in t)) {
             ticketsFromStorage = parsed;
-        } else if (parsed.length > 0) { // If it's an array but not of tickets
-            console.warn("Los datos almacenados en localStorage son un array pero no de tickets válidos. Descartando.");
+        } else if (parsed.length > 0) { 
+            console.warn("Los datos de tickets almacenados no tienen IDs numéricos o no son válidos. Se regenerarán.");
             localStorage.removeItem(TICKETS_STORAGE_KEY);
         }
-        // If parsed is an empty array, ticketsFromStorage remains []
       } else {
         console.warn("Los datos de tickets almacenados no eran un array. Descartando.");
-        localStorage.removeItem(TICKETS_STORAGE_KEY); // Clear invalid data
+        localStorage.removeItem(TICKETS_STORAGE_KEY); 
       }
     } catch (e) {
       console.error("Error al parsear tickets desde localStorage. Descartando.", e);
-      localStorage.removeItem(TICKETS_STORAGE_KEY); // Clear corrupted data
+      localStorage.removeItem(TICKETS_STORAGE_KEY); 
     }
   }
 
-  // If no tickets were loaded from storage (it was null, empty, parsing failed, or data was invalid)
   if (ticketsFromStorage.length === 0) {
-    const exampleTickets = Array.from({ length: 10 }, (_, i) => generateRandomTicket(i)); // Generar 10 tickets
+    const exampleTickets = Array.from({ length: 10 }, (_, i) => generateRandomTicket(i));
     localStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(exampleTickets));
-    return exampleTickets.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return exampleTickets.sort((a,b) => b.id - a.id); // Ordenar por ID descendente (más nuevo primero)
   }
 
-  return ticketsFromStorage.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return ticketsFromStorage.sort((a,b) => b.id - a.id); // Ordenar por ID descendente
 }
 
 function getInitialTimeLogs(): TimeLog[] {
   if (typeof window === "undefined") return [];
   const storedTimeLogs = localStorage.getItem(TIMELOGS_STORAGE_KEY);
-  // Podríamos generar time logs de ejemplo aquí también si quisiéramos
   return storedTimeLogs ? JSON.parse(storedTimeLogs) : [];
 }
 
@@ -150,43 +146,60 @@ export function useTicketStore() {
     }
   }, [timeLogs, isInitialized]);
 
+  const getNextId = useCallback(() => {
+    if (tickets.length === 0) {
+      return 1;
+    }
+    return Math.max(...tickets.map(t => t.id)) + 1;
+  }, [tickets]);
+
   const addTicket = useCallback((newTicketData: Omit<Ticket, "id" | "createdAt" | "updatedAt" | "status" | "timeLoggedMinutes"> & { category: string; priority: Priority }) => {
     const newTicket: Ticket = {
       ...newTicketData,
-      id: crypto.randomUUID(),
+      id: getNextId(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       status: "Open",
       timeLoggedMinutes: 0,
     };
-    setTickets((prevTickets) => [newTicket, ...prevTickets].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    setTickets((prevTickets) => [newTicket, ...prevTickets].sort((a,b) => b.id - a.id));
     return newTicket;
-  }, []);
+  }, [getNextId]);
+  
+  const updateTicket = useCallback((id: number, dataToUpdate: Partial<Omit<Ticket, "id" | "createdAt" | "timeLoggedMinutes">>) => {
+    setTickets(prev => prev.map(t => 
+      t.id === id 
+        ? { ...t, ...dataToUpdate, updatedAt: new Date().toISOString() } 
+        : t
+    ).sort((a,b) => b.id - a.id));
+    // Podríamos devolver el ticket actualizado si es necesario
+    return tickets.find(t => t.id === id);
+  }, [tickets]);
 
-  const getTicketById = useCallback((id: string): Ticket | undefined => {
+  const getTicketById = useCallback((id: number): Ticket | undefined => {
     return tickets.find(ticket => ticket.id === id);
   }, [tickets]);
   
-  const updateTicketStatus = useCallback((id: string, status: Status) => {
-    setTickets(prev => prev.map(t => t.id === id ? {...t, status, updatedAt: new Date().toISOString()} : t).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+  const updateTicketStatus = useCallback((id: number, status: Status) => {
+    setTickets(prev => prev.map(t => t.id === id ? {...t, status, updatedAt: new Date().toISOString()} : t).sort((a,b) => b.id - a.id));
   }, []);
 
-  const logTimeForTicket = useCallback((ticketId: string, durationMinutes: number, notes?: string) => {
+  const logTimeForTicket = useCallback((ticketId: number, durationMinutes: number, notes?: string) => {
     const newTimeLog: TimeLog = {
       id: crypto.randomUUID(),
       ticketId,
-      userId: "dev_user", // Placeholder
+      userId: "dev_user", 
       durationMinutes,
       notes,
       loggedAt: new Date().toISOString(),
     };
     setTimeLogs(prev => [...prev, newTimeLog]);
-    setTickets(prev => prev.map(t => t.id === ticketId ? {...t, timeLoggedMinutes: t.timeLoggedMinutes + durationMinutes, updatedAt: new Date().toISOString()} : t).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    setTickets(prev => prev.map(t => t.id === ticketId ? {...t, timeLoggedMinutes: t.timeLoggedMinutes + durationMinutes, updatedAt: new Date().toISOString()} : t).sort((a,b) => b.id - a.id));
   }, []);
 
-  const getTickets = useCallback(() => tickets.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), [tickets]);
+  const getTickets = useCallback(() => tickets.sort((a,b) => b.id - a.id), [tickets]);
   
-  const getTimeLogsForTicket = useCallback((ticketId: string) => {
+  const getTimeLogsForTicket = useCallback((ticketId: number) => {
     return timeLogs.filter(log => log.ticketId === ticketId);
   }, [timeLogs]);
 
@@ -195,6 +208,7 @@ export function useTicketStore() {
     tickets,
     addTicket,
     getTicketById,
+    updateTicket,
     updateTicketStatus,
     logTimeForTicket,
     getTickets,

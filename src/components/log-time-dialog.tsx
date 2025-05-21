@@ -21,7 +21,7 @@ interface LogTimeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   ticket: Ticket | null;
-  onLogTime: (ticketId: string, durationMinutes: number, notes?: string) => void;
+  onLogTime: (ticketId: number, durationMinutes: number, notes?: string) => void; // ticketId es number
 }
 
 export const LogTimeDialog: FC<LogTimeDialogProps> = ({
@@ -40,7 +40,7 @@ export const LogTimeDialog: FC<LogTimeDialogProps> = ({
       alert("Por favor, ingresa una duración válida en minutos.");
       return;
     }
-    onLogTime(ticket.id, durationMinutes, notes);
+    onLogTime(ticket.id, durationMinutes, notes); // ticket.id ya es number
     setDuration("");
     setNotes("");
     onOpenChange(false);
@@ -52,7 +52,7 @@ export const LogTimeDialog: FC<LogTimeDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Registrar Tiempo para Ticket: {ticket.title}</DialogTitle>
+          <DialogTitle>Registrar Tiempo para Ticket: #{ticket.id} - {ticket.title}</DialogTitle>
           <DialogDescription>
             Ingresa el tiempo dedicado y cualquier nota relevante para esta tarea.
           </DialogDescription>

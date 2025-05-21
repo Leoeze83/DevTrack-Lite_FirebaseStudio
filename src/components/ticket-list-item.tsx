@@ -7,15 +7,16 @@ import type { Ticket, Status } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Archive, CheckCircle2, CircleDot, Clock, LoaderCircle, MoreVertical, PauseCircle, Timer } from "lucide-react";
+import { Archive, CheckCircle2, CircleDot, Clock, Edit, LoaderCircle, MoreVertical, PauseCircle, Timer } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale"; 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 interface TicketListItemProps {
   ticket: Ticket;
   onLogTimeClick: (ticket: Ticket) => void;
-  onUpdateStatus: (ticketId: string, status: Status) => void;
+  onUpdateStatus: (ticketId: number, status: Status) => void;
 }
 
 const statusIcons: Record<Status, JSX.Element> = {
@@ -62,15 +63,30 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col h-full">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg mb-1 line-clamp-2">{ticket.title}</CardTitle>
+            <div className="flex-grow">
+                <Link href={`/tickets/${ticket.id}/edit`} className="group">
+                    <CardTitle className="text-lg mb-1 line-clamp-2 group-hover:text-primary group-hover:underline">
+                        #{ticket.id} - {ticket.title}
+                    </CardTitle>
+                </Link>
+                <CardDescription className="text-sm text-muted-foreground line-clamp-2 min-h-[3rem]">
+                {ticket.description}
+                </CardDescription>
+            </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0 ml-2">
                 <MoreVertical className="h-4 w-4" />
                 <span className="sr-only">Más acciones</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+               <DropdownMenuItem asChild>
+                 <Link href={`/tickets/${ticket.id}/edit`} className="text-sm w-full">
+                    <Edit className="mr-2 h-4 w-4" />
+                    Editar Ticket
+                 </Link>
+               </DropdownMenuItem>
               {availableStatuses.map(status => (
                 <DropdownMenuItem 
                   key={status} 
@@ -85,9 +101,7 @@ export const TicketListItem: FC<TicketListItemProps> = ({ ticket, onLogTimeClick
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <CardDescription className="text-sm text-muted-foreground line-clamp-2 min-h-[3rem]">
-          {ticket.description}
-        </CardDescription>
+        
       </CardHeader>
       <CardContent className="space-y-3 flex-grow pb-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground">

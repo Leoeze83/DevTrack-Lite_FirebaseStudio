@@ -3,7 +3,7 @@ export type Priority = "low" | "medium" | "high";
 export type Status = "Open" | "In Progress" | "Pending" | "Resolved" | "Closed";
 
 export interface Ticket {
-  id: string;
+  id: number; // Cambiado de string a number
   title: string;
   description: string;
   category: string;
@@ -16,8 +16,8 @@ export interface Ticket {
 }
 
 export interface TimeLog {
-  id: string;
-  ticketId: string;
+  id: string; // Puede seguir siendo UUID para los logs
+  ticketId: number; // Cambiado de string a number para coincidir con Ticket.id
   userId: string; // For now, can be a placeholder like "dev_user"
   durationMinutes: number;
   notes?: string;
