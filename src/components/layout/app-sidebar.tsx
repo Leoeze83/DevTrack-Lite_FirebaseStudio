@@ -13,13 +13,12 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { TicketCheck, LayoutDashboard, PlusSquare, Settings, LogOut, Users, BarChart3, List } from "lucide-react";
+import { TicketCheck, LayoutDashboard, PlusSquare, Settings, LogOut, Users, BarChart3 } from "lucide-react"; // Eliminado List
 
 const navItems = [
   { href: "/", label: "Panel Principal", icon: LayoutDashboard },
   { href: "/tickets/create", label: "Crear Ticket", icon: PlusSquare },
-  // { href: "/tickets", label: "Todos los Tickets", icon: List }, // Comentado o eliminado
-  { href: "/reports", label: "Informes", icon: BarChart3 }, // Nuevo enlace de Informes
+  { href: "/reports", label: "Informes", icon: BarChart3 },
 ];
 
 const adminNavItems = [
@@ -31,9 +30,9 @@ export const AppSidebar: FC = () => {
 
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary group-data-[collapsible=icon]:justify-center">
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8">
+      <SidebarHeader className="border-b border-sidebar-border p-2 flex items-center group-data-[collapsible=icon]:justify-center">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 shrink-0">
              <TicketCheck className="h-6 w-6" />
           </Button>
           <span className="group-data-[collapsible=icon]:hidden">DevTrack Lite</span>
@@ -45,7 +44,7 @@ export const AppSidebar: FC = () => {
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname === item.href || (item.href === "/reports" && pathname.startsWith("/reports"))} // Ajuste para isActive
+                isActive={pathname === item.href || (item.href === "/reports" && pathname.startsWith("/reports"))}
                 tooltip={{ children: item.label, className: "ml-2"}}
               >
                 <Link href={item.href}>
@@ -92,10 +91,11 @@ export const AppSidebar: FC = () => {
             </SidebarMenuItem>
              <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={{ children: "Cerrar Sesión", className: "ml-2"}} variant="outline">
-                <Link href="#"> 
+                {/* Simulación de cierre de sesión, no implementado realmente */}
+                <button onClick={() => alert("Funcionalidad de Cerrar Sesión no implementada.")}> 
                   <LogOut />
                   <span>Cerrar Sesión</span>
-                </Link>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
          </SidebarMenu>
