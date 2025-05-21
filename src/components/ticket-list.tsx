@@ -233,7 +233,7 @@ export const TicketList: FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px] px-2 py-3 border-r">
+                  <TableHead className="w-[80px] px-2 py-3">
                     <Button
                       variant="ghost"
                       onClick={() => handleSortChange('id')}
@@ -243,42 +243,42 @@ export const TicketList: FC = () => {
                       {renderSortArrow('id')}
                     </Button>
                   </TableHead>
-                  <TableHead className="min-w-[250px] px-2 py-3 text-xs font-semibold border-r">Título</TableHead>
-                  <TableHead className="w-[150px] px-2 py-3 text-xs font-semibold border-r">Categoría</TableHead>
-                  <TableHead className="w-[120px] px-2 py-3 text-xs font-semibold border-r">Prioridad</TableHead>
-                  <TableHead className="w-[150px] px-2 py-3 text-xs font-semibold border-r">Estado</TableHead>
-                  <TableHead className="w-[100px] px-2 py-3 text-xs font-semibold border-r">Creado</TableHead>
-                  <TableHead className="w-[110px] px-2 py-3 text-xs font-semibold border-r">Tiempo Reg.</TableHead>
+                  <TableHead className="min-w-[250px] px-2 py-3 text-xs font-semibold">Título</TableHead>
+                  <TableHead className="w-[150px] px-2 py-3 text-xs font-semibold">Categoría</TableHead>
+                  <TableHead className="w-[120px] px-2 py-3 text-xs font-semibold">Prioridad</TableHead>
+                  <TableHead className="w-[150px] px-2 py-3 text-xs font-semibold">Estado</TableHead>
+                  <TableHead className="w-[100px] px-2 py-3 text-xs font-semibold">Creado</TableHead>
+                  <TableHead className="w-[110px] px-2 py-3 text-xs font-semibold">Tiempo Reg.</TableHead>
                   <TableHead className="w-[100px] text-right px-2 py-3 text-xs font-semibold">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedAndFilteredTickets.map((ticket) => (
                   <TableRow key={ticket.id} className="text-xs">
-                    <TableCell className="font-medium px-2 py-2.5 border-r">
+                    <TableCell className="font-medium px-2 py-2.5">
                       <Link href={`/tickets/${ticket.id}/edit`} className="hover:text-primary hover:underline">
                           #{ticket.id}
                       </Link>
                     </TableCell>
-                    <TableCell className="max-w-xs md:max-w-sm lg:max-w-md truncate px-2 py-2.5 border-r" title={ticket.title}>{ticket.title}</TableCell>
-                    <TableCell className="px-2 py-2.5 border-r">
+                    <TableCell className="max-w-xs md:max-w-sm lg:max-w-md truncate px-2 py-2.5" title={ticket.title}>{ticket.title}</TableCell>
+                    <TableCell className="px-2 py-2.5">
                       <Badge variant="secondary" className="text-xs font-normal">{ticket.category}</Badge>
                     </TableCell>
-                    <TableCell className="px-2 py-2.5 border-r">
+                    <TableCell className="px-2 py-2.5">
                       <Badge 
                           className={`text-xs font-normal ${priorityBadgeColors[ticket.priority]}`}
                       >
                           {priorityFilterTranslations[ticket.priority]}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-2 py-2.5 border-r">
+                    <TableCell className="px-2 py-2.5">
                       <Badge variant="outline" className={`flex items-center gap-1.5 text-xs font-normal ${statusColorsClasses[ticket.status]}`}>
                         {React.cloneElement(statusIcons[ticket.status], { className: 'h-3 w-3' })}
                         {statusFilterTranslations[ticket.status]}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs px-2 py-2.5 border-r">{format(parseISO(ticket.createdAt), "dd MMM yy", { locale: es })}</TableCell>
-                    <TableCell className="text-xs px-2 py-2.5 border-r">{(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs</TableCell>
+                    <TableCell className="text-xs px-2 py-2.5">{format(parseISO(ticket.createdAt), "dd MMM yy", { locale: es })}</TableCell>
+                    <TableCell className="text-xs px-2 py-2.5">{(ticket.timeLoggedMinutes / 60).toFixed(1)} hrs</TableCell>
                     <TableCell className="text-right px-2 py-2.5">
                       <div className="flex items-center justify-end gap-0.5">
                           <TooltipProvider>
@@ -337,3 +337,4 @@ export const TicketList: FC = () => {
     </div>
   );
 };
+
