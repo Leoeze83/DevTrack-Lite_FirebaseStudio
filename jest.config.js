@@ -16,6 +16,7 @@ const customJestConfig = {
     '^@/lib/(.*)$': '<rootDir>/src/lib/$1',
     '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^@/app/(.*)$': '<rootDir>/src/app/$1',
+    '^@/ai/(.*)$': '<rootDir>/src/ai/$1',
   },
   preset: 'ts-jest',
 }
