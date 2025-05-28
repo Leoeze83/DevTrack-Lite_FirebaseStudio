@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Importar useEffect
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -24,7 +24,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { login, currentUser } = useAuthStore();
+  const { login, currentUser, isAuthLoading } = useAuthStore(); // Añadir isAuthLoading
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -35,9 +35,21 @@ export default function LoginPage() {
     },
   });
 
-  if (currentUser) {
-    router.replace("/"); // Redirigir si ya está logueado
-    return null;
+  useEffect(() => {
+    // Solo redirigir si la autenticación no está cargando y el usuario ya existe
+    if (!isAuthLoading && currentUser) {
+      router.replace("/");
+    }
+  }, [currentUser, isAuthLoading, router]);
+
+  // Si la autenticación está cargando o ya hay un usuario (y la redirección está en curso),
+  // podríamos mostrar un loader o null para evitar renderizar el formulario innecesariamente.
+  if (isAuthLoading || currentUser) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -50,7 +62,11 @@ export default function LoginPage() {
         title: "¡Inicio de Sesión Exitoso!",
         description: "Bienvenido de nuevo.",
       });
-      router.push("/");
+      // El useEffect se encargará de la redirección si currentUser se actualiza
+      // No es necesario router.push("/") aquí si el useEffect ya lo maneja.
+      // Sin embargo, para una redirección inmediata tras el login, podría mantenerse,
+      // pero asegurándose de que no cause conflictos con el useEffect.
+      // Por ahora, confiamos en el useEffect.
     } else {
       toast({
         title: "Error de Inicio de Sesión",
@@ -103,13 +119,6 @@ export default function LoginPage() {
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Iniciar Sesión
               </Button>
-              {/* Opcional: Enlace para crear cuenta si aún no existe */}
-              {/* <p className="mt-4 text-center text-sm text-muted-foreground">
-                ¿No tienes cuenta?{" "}
-                <Link href="/admin/users/create" className="underline text-primary hover:text-primary/80">
-                  Regístrate aquí
-                </Link>
-              </p> */}
             </CardFooter>
           </form>
         </Form>
