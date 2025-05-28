@@ -22,12 +22,14 @@
 *   🔑 **Autenticación (Simulada):**
     *   Página de inicio de sesión con validación de email y contraseña.
     *   Creación de usuarios con nombre, email y contraseña.
-    *   Funcionalidad de "Cerrar Sesión".
+    *   Funcionalidad de "Cerrar Sesión" desde el menú de perfil en la cabecera.
     *   Protección básica de rutas.
 *   👤 **Gestión de Perfil de Usuario:**
     *   Página "Mi Perfil" (`/profile`).
     *   Permite al usuario autenticado ver y editar su nombre.
+    *   Permite subir y cambiar la imagen de perfil (guardada como Data URL).
     *   Muestra el email (solo lectura).
+    *   Menú de perfil en la cabecera con acceso rápido a perfil, configuración y cierre de sesión.
 *   🌓 **Tema Claro y Oscuro:** Cambia entre un tema visual claro y oscuro para mayor comodidad, con un interruptor accesible en la cabecera y en la página de configuración.
 *   👥 **Gestión de Usuarios (Admin):** Crea y visualiza usuarios en el sistema desde una sección de administración.
 *   🇪🇸 **Interfaz en Español:** Toda la aplicación está diseñada pensando en el usuario de habla hispana.
@@ -55,7 +57,7 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 *   **Validación de Datos:**
     *   **Zod:** Validación de esquemas para formularios y datos.
 *   **Persistencia de Datos (Prototipo):**
-    *   **`localStorage` del Navegador:** Para simular la persistencia de tickets, usuarios y sesión de usuario.
+    *   **`localStorage` del Navegador:** Para simular la persistencia de tickets, usuarios, sesión de usuario e imágenes de perfil (como Data URLs).
 *   **Exportación de Datos:**
     *   **`jspdf` y `jspdf-autotable`:** Para la generación de informes en PDF.
     *   **`xlsx` (SheetJS):** Para la generación de informes en formato Excel.
@@ -78,13 +80,17 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 ### 🔑 Autenticación (Simulada)
 *   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando un email y contraseña. La validación se hace contra los usuarios almacenados en `localStorage` (gestidos por `useUserStore`).
 *   **Creación de Usuarios:** Desde `/admin/users/create`, se pueden crear nuevos usuarios especificando nombre, email y contraseña.
-*   **Cierre de Sesión:** Un botón en la barra lateral permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
+*   **Cierre de Sesión:** Un botón en el menú de perfil en la cabecera permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
 *   **Protección de Rutas:** Un componente `AuthGuard` redirige a los usuarios no autenticados a la página de login si intentan acceder a rutas protegidas.
 
 ### 👤 Gestión de Perfil de Usuario
-*   **Página "Mi Perfil" (`/profile`):** Accesible desde la barra lateral una vez autenticado.
-*   **Visualización y Edición:** Muestra el nombre y correo electrónico del usuario actual. Permite editar el nombre.
-*   **Persistencia:** Los cambios en el nombre se guardan en `localStorage` a través de `useUserStore` y se reflejan en el estado de `useAuthStore`.
+*   **Menú de Perfil en Cabecera:** Un avatar en la cabecera despliega un menú con el nombre/email del usuario, y enlaces a "Mi Perfil", "Configuración" y "Cerrar Sesión".
+*   **Página "Mi Perfil" (`/profile`):** Accesible desde el menú de perfil.
+    *   **Visualización y Edición:** Muestra el nombre, correo electrónico y avatar del usuario actual.
+    *   **Cambio de Nombre:** Permite editar el nombre del usuario.
+    *   **Cambio de Avatar:** Permite al usuario seleccionar un archivo de imagen (PNG, JPG, GIF). La imagen se convierte a Data URL, se muestra una vista previa y se guarda en `localStorage`.
+    *   **Email (Solo Lectura):** El correo electrónico no se puede modificar desde esta interfaz.
+*   **Persistencia:** Los cambios en el nombre y avatar se guardan en `localStorage` a través de `useUserStore` y se reflejan en el estado de `useAuthStore`.
 
 ### 🎫 Gestión de Tickets
 *   **Dashboard Principal (`/`):** Muestra una lista/grilla de todos los tickets (requiere inicio de sesión). Filtros por término, estado y prioridad. Permite cambiar entre vista de grilla y lista.

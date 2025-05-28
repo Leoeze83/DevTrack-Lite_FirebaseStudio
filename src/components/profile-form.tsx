@@ -1,24 +1,25 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAuthStore } from "@/lib/hooks/useAuthStore";
 import { useUserStore } from "@/lib/hooks/use-user-store";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const profileFormSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres.").max(100),
   email: z.string().email("El correo electrónico no es válido."),
-  // Podríamos añadir más campos aquí, como avatarUrl, etc.
+  avatarUrl: z.string().optional(), // Puede ser un Data URL o una URL existente
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -28,12 +29,15 @@ export function ProfileForm() {
   const { updateUser } = useUserStore();
   const { toast } = useToast();
   const router = useRouter();
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       name: currentUser?.name || "",
       email: currentUser?.email || "",
+      avatarUrl: currentUser?.avatarUrl || "",
     },
   });
 
@@ -42,9 +46,45 @@ export function ProfileForm() {
       form.reset({
         name: currentUser.name,
         email: currentUser.email,
+        avatarUrl: currentUser.avatarUrl,
       });
+      if (currentUser.avatarUrl) {
+        setSelectedImagePreview(currentUser.avatarUrl);
+      } else {
+        setSelectedImagePreview(null);
+      }
     }
   }, [currentUser, form]);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // Límite de 2MB
+        toast({
+          title: "Archivo Demasiado Grande",
+          description: "Por favor, selecciona una imagen de menos de 2MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        setSelectedImagePreview(dataUrl);
+        form.setValue("avatarUrl", dataUrl, { shouldDirty: true }); // Marcar como 'dirty'
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const getUserInitials = (name?: string) => {
+    if (!name) return "U";
+    const nameParts = name.split(" ");
+    if (nameParts.length > 1) {
+      return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   const onSubmit = async (data: ProfileFormValues) => {
     if (!currentUser) {
@@ -57,17 +97,24 @@ export function ProfileForm() {
     }
 
     try {
-      // 1. Actualizar en el userStore (nuestra "base de datos" de usuarios)
-      const updatedUserInDb = updateUser(currentUser.id, { name: data.name });
+      const updateData: Partial<Omit<ProfileFormValues, "email">> = { name: data.name };
+      if (form.formState.dirtyFields.avatarUrl && data.avatarUrl) { // Solo actualizar si el avatar cambió
+        updateData.avatarUrl = data.avatarUrl;
+      } else if (!data.avatarUrl && currentUser.avatarUrl) { // Si se borró el avatar
+        updateData.avatarUrl = ""; // O undefined, dependiendo de cómo quieras manejarlo
+      }
+
+
+      const updatedUserInDb = updateUser(currentUser.id, updateData);
 
       if (updatedUserInDb) {
-        // 2. Actualizar el currentUser en el authStore para reflejar el cambio inmediatamente en la UI
-        updateCurrentUserData({ name: data.name });
+        updateCurrentUserData(updateData);
         
         toast({
           title: "¡Perfil Actualizado!",
-          description: "Tu nombre ha sido actualizado exitosamente.",
+          description: "Tu información ha sido actualizada exitosamente.",
         });
+        form.reset({}, { keepValues: true, keepDirty: false, keepDefaultValues: false }); // Reset dirty state
       } else {
          toast({
           title: "Error de Actualización",
@@ -108,7 +155,6 @@ export function ProfileForm() {
     );
   }
 
-
   return (
     <Card className="w-full max-w-lg mx-auto shadow-xl">
       <CardHeader>
@@ -120,6 +166,36 @@ export function ProfileForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-6">
+            <div className="flex flex-col items-center space-y-4">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={selectedImagePreview || currentUser.avatarUrl} alt={currentUser.name} />
+                <AvatarFallback className="text-3xl">{getUserInitials(currentUser.name)}</AvatarFallback>
+              </Avatar>
+              <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="mr-2 h-4 w-4" />
+                Cambiar Foto
+              </Button>
+              <Input 
+                type="file" 
+                className="hidden" 
+                ref={fileInputRef} 
+                onChange={handleImageChange} 
+                accept="image/png, image/jpeg, image/gif"
+              />
+              <FormField
+                control={form.control}
+                name="avatarUrl"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="name"
@@ -147,7 +223,6 @@ export function ProfileForm() {
                 </FormItem>
               )}
             />
-            {/* Aquí podríamos añadir campos para Avatar URL, cambiar contraseña, etc. en el futuro */}
           </CardContent>
           <CardFooter className="flex justify-end">
             <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isDirty}>

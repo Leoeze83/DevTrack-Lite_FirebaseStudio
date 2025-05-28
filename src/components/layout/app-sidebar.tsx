@@ -1,7 +1,7 @@
 
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation"; // No necesitamos useRouter aquí
 import type { FC } from "react";
 import {
   Sidebar,
@@ -10,11 +10,11 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
+  SidebarFooter, // No se usará SidebarFooter
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { TicketCheck, LayoutDashboard, PlusSquare, Settings, LogOut, Users, BarChart3, UserCircle2 } from "lucide-react"; // Añadido UserCircle2
-import { useAuthStore } from "@/lib/hooks/useAuthStore";
+import { TicketCheck, LayoutDashboard, PlusSquare, Settings, Users, BarChart3 } from "lucide-react";
+// useAuthStore ya no se necesita aquí para logout
 
 const navItems = [
   { href: "/", label: "Panel Principal", icon: LayoutDashboard },
@@ -26,20 +26,21 @@ const adminNavItems = [
   { href: "/admin/users", label: "Gestión de Usuarios", icon: Users },
 ];
 
-const userNavItems = [
-  { href: "/profile", label: "Mi Perfil", icon: UserCircle2 },
-  { href: "/settings", label: "Configuración", icon: Settings },
-];
+// Los enlaces de Cuenta (Perfil, Configuración) y Cerrar Sesión se mueven al AppHeader
+// const userNavItems = [
+//   { href: "/profile", label: "Mi Perfil", icon: UserCircle2 },
+//   { href: "/settings", label: "Configuración", icon: Settings },
+// ];
 
 export const AppSidebar: FC = () => {
   const pathname = usePathname();
-  const router = useRouter();
-  const { logout, currentUser } = useAuthStore(); 
+  // const router = useRouter(); // Ya no es necesario aquí
+  // const { logout, currentUser } = useAuthStore(); // Ya no es necesario aquí
 
-  const handleLogout = () => {
-    logout(); 
-    router.push("/login"); 
-  };
+  // const handleLogout = () => { // Movido a AppHeader
+  //   logout(); 
+  //   router.push("/login"); 
+  // };
 
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
@@ -90,48 +91,9 @@ export const AppSidebar: FC = () => {
           ))}
         </SidebarMenu>
 
-        {/* Sección de Usuario (Perfil y Configuración) */}
-        <SidebarMenu className="mt-4 pt-4 border-t border-sidebar-border">
-           <SidebarMenuItem>
-             <span className="px-2 text-xs font-semibold text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">Cuenta</span>
-           </SidebarMenuItem>
-          {userNavItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname === item.href}
-                tooltip={{ children: item.label, className: "ml-2"}}
-              >
-                <Link href={item.href}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-
+        {/* La Sección de Cuenta (Perfil y Configuración) y Cerrar Sesión se han movido al AppHeader */}
       </SidebarContent>
-      <SidebarFooter className="p-2 border-t border-sidebar-border">
-         <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton 
-                asChild 
-                tooltip={{ children: "Cerrar Sesión", className: "ml-2"}} 
-                variant="outline"
-              >
-                <button 
-                  type="button" 
-                  onClick={handleLogout} 
-                  className="w-full flex items-center justify-start text-left" 
-                > 
-                  <LogOut />
-                  <span>Cerrar Sesión</span>
-                </button>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-         </SidebarMenu>
-      </SidebarFooter>
+      {/* SidebarFooter ya no es necesario */}
     </Sidebar>
   );
 };
