@@ -80,7 +80,9 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 
 ### 🔑 Autenticación (Simulada)
 *   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando un email y contraseña. La validación se hace contra los usuarios almacenados en `localStorage` (gestidos por `useUserStore`).
-    *   **Usuarios Predeterminados para Despliegue:** En entornos como Vercel, si no hay usuarios en `localStorage`, se cargarán usuarios de demostración (ej. `demo@example.com` / `password123`) desde un archivo `seed-users.json` para permitir el inicio de sesión.
+    *   **Usuarios Predeterminados para Despliegue:** En entornos como Vercel, si no hay usuarios en `localStorage`, se cargarán usuarios de demostración desde un archivo `seed-users.json` para permitir el inicio de sesión. Puedes usar:
+        *   Email: `devuser@example.com` / Contraseña: `987654321`
+        *   Email: `usertest@example.com` / Contraseña: `123456789`
 *   **Creación de Usuarios:** Desde `/admin/users/create`, se pueden crear nuevos usuarios especificando nombre, email y contraseña. Estos usuarios se guardan en `localStorage`. En un entorno desplegado, estos usuarios creados solo existirán en el navegador del visitante actual.
 *   **Cerrar Sesión:** Un botón en el menú de perfil (ubicado en el pie de la barra lateral) permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
 *   **Protección de Rutas:** Un componente `AuthGuard` redirige a los usuarios no autenticados a la página de login si intentan acceder a rutas protegidas.

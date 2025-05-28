@@ -1,19 +1,19 @@
 
 [
   {
-    "id": "seed-user-1",
-    "name": "Usuario Demo",
-    "email": "demo@example.com",
-    "password": "password123",
-    "avatarUrl": "https://placehold.co/100x100.png?text=UD&data-ai-hint=avatar+placeholder",
+    "id": "seed-user-dev",
+    "name": "DevUser",
+    "email": "devuser@example.com",
+    "password": "987654321",
+    "avatarUrl": "https://placehold.co/100x100.png?text=DU&data-ai-hint=avatar+placeholder",
     "createdAt": "2023-01-01T10:00:00.000Z"
   },
   {
-    "id": "seed-user-2",
-    "name": "Admin Ejemplo",
-    "email": "admin@example.com",
-    "password": "password123",
-    "avatarUrl": "https://placehold.co/100x100.png?text=AE&data-ai-hint=avatar+placeholder",
+    "id": "seed-user-test",
+    "name": "UserTest",
+    "email": "usertest@example.com",
+    "password": "123456789",
+    "avatarUrl": "https://placehold.co/100x100.png?text=UT&data-ai-hint=avatar+placeholder",
     "createdAt": "2023-01-02T10:00:00.000Z"
   }
 ]
