@@ -13,7 +13,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { TicketCheck, LayoutDashboard, PlusSquare, Settings, LogOut, Users, BarChart3 } from "lucide-react";
+import { TicketCheck, LayoutDashboard, PlusSquare, Settings, LogOut, Users, BarChart3, UserCircle2 } from "lucide-react"; // Añadido UserCircle2
 import { useAuthStore } from "@/lib/hooks/useAuthStore";
 
 const navItems = [
@@ -26,14 +26,19 @@ const adminNavItems = [
   { href: "/admin/users", label: "Gestión de Usuarios", icon: Users },
 ];
 
+const userNavItems = [
+  { href: "/profile", label: "Mi Perfil", icon: UserCircle2 },
+  { href: "/settings", label: "Configuración", icon: Settings },
+];
+
 export const AppSidebar: FC = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuthStore(); // Solo necesitamos logout del store
+  const { logout, currentUser } = useAuthStore(); 
 
   const handleLogout = () => {
-    logout(); // Esto limpia el currentUser en el store y localStorage
-    router.push("/login"); // Esto redirige al usuario
+    logout(); 
+    router.push("/login"); 
   };
 
   return (
@@ -52,7 +57,7 @@ export const AppSidebar: FC = () => {
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname === item.href || (item.href === "/reports" && pathname.startsWith("/reports")) || (item.href === "/" && pathname.startsWith("/tickets/") && pathname.endsWith("/edit"))}
+                isActive={pathname === item.href || (item.href === "/" && pathname.startsWith("/tickets/") && pathname.endsWith("/edit")) || (item.href === "/reports" && pathname.startsWith("/reports"))}
                 tooltip={{ children: item.label, className: "ml-2"}}
               >
                 <Link href={item.href}>
@@ -63,6 +68,8 @@ export const AppSidebar: FC = () => {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
+        
+        {/* Sección de Admin */}
         <SidebarMenu className="mt-4 pt-4 border-t border-sidebar-border">
            <SidebarMenuItem>
              <span className="px-2 text-xs font-semibold text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">Admin</span>
@@ -82,31 +89,41 @@ export const AppSidebar: FC = () => {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
+
+        {/* Sección de Usuario (Perfil y Configuración) */}
+        <SidebarMenu className="mt-4 pt-4 border-t border-sidebar-border">
+           <SidebarMenuItem>
+             <span className="px-2 text-xs font-semibold text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">Cuenta</span>
+           </SidebarMenuItem>
+          {userNavItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === item.href}
+                tooltip={{ children: item.label, className: "ml-2"}}
+              >
+                <Link href={item.href}>
+                  <item.icon />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+
       </SidebarContent>
       <SidebarFooter className="p-2 border-t border-sidebar-border">
          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton 
                 asChild 
-                tooltip={{ children: "Configuración", className: "ml-2"}}
-                isActive={pathname === "/settings"}
-              >
-                <Link href="/settings">
-                  <Settings />
-                  <span>Configuración</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-              <SidebarMenuButton 
-                asChild // Aseguramos que SidebarMenuButton actúe como un Slot
                 tooltip={{ children: "Cerrar Sesión", className: "ml-2"}} 
                 variant="outline"
               >
                 <button 
                   type="button" 
-                  onClick={handleLogout} // El onClick ahora está en un botón explícito
-                  className="w-full flex items-center justify-start text-left" // Asegura que el botón interno tome los estilos y el ancho
+                  onClick={handleLogout} 
+                  className="w-full flex items-center justify-start text-left" 
                 > 
                   <LogOut />
                   <span>Cerrar Sesión</span>

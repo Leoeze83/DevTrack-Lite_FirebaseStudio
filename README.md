@@ -8,7 +8,7 @@
 [![ShadCN UI](https://img.shields.io/badge/ShadCN_UI-Jazmín-black?style=for-the-badge&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/)
 [![Genkit](https://img.shields.io/badge/Genkit_AI-Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/docs/genkit)
 
-**DevTrack Lite** es una aplicación web moderna y ágil, diseñada para simplificar la gestión de tickets de soporte y el seguimiento del tiempo. Potenciada con Inteligencia Artificial para la categorización automática, ofrece una experiencia de usuario fluida y eficiente, ahora con un sistema básico de autenticación.
+**DevTrack Lite** es una aplicación web moderna y ágil, diseñada para simplificar la gestión de tickets de soporte y el seguimiento del tiempo. Potenciada con Inteligencia Artificial para la categorización automática, ofrece una experiencia de usuario fluida y eficiente, con un sistema de autenticación y gestión de perfiles.
 
 ## 🌟 Características Principales
 
@@ -20,12 +20,16 @@
     *   Filtra los datos para análisis específicos.
     *   Exporta informes a PDF y Excel.
 *   🔑 **Autenticación (Simulada):**
-    *   Página de inicio de sesión.
-    *   Creación de usuarios con contraseña.
+    *   Página de inicio de sesión con validación de email y contraseña.
+    *   Creación de usuarios con nombre, email y contraseña.
     *   Funcionalidad de "Cerrar Sesión".
     *   Protección básica de rutas.
-*   🌓 **Tema Claro y Oscuro:** Cambia entre un tema visual claro y oscuro para mayor comodidad, con un interruptor accesible en la cabecera.
-*   👥 **Gestión de Usuarios:** Crea y visualiza usuarios en el sistema, ahora con campo de contraseña.
+*   👤 **Gestión de Perfil de Usuario:**
+    *   Página "Mi Perfil" (`/profile`).
+    *   Permite al usuario autenticado ver y editar su nombre.
+    *   Muestra el email (solo lectura).
+*   🌓 **Tema Claro y Oscuro:** Cambia entre un tema visual claro y oscuro para mayor comodidad, con un interruptor accesible en la cabecera y en la página de configuración.
+*   👥 **Gestión de Usuarios (Admin):** Crea y visualiza usuarios en el sistema desde una sección de administración.
 *   🇪🇸 **Interfaz en Español:** Toda la aplicación está diseñada pensando en el usuario de habla hispana.
 *   📱 **Diseño Responsivo:** Adaptable a diferentes tamaños de pantalla.
 
@@ -34,7 +38,7 @@
 Este proyecto está construido con un stack tecnológico moderno y eficiente:
 
 *   **Frontend & Framework:**
-    *   **Next.js 15+:** App Router, Server Components, Server Actions.
+    *   **Next.js 15+:** App Router, Server Components, Server Actions (para IA).
     *   **React 18+:** Para la construcción de interfaces de usuario interactivas.
     *   **TypeScript:** Para un desarrollo robusto y tipado seguro.
 *   **Estilos:**
@@ -60,8 +64,8 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 ```
 /src
 ├── ai/             # Lógica de IA con Genkit
-├── app/            # Rutas (incluyendo /login, /admin, /reports, etc.)
-├── components/     # Componentes React (UI, layout, formularios, gráficos, auth)
+├── app/            # Rutas (incluyendo /login, /admin, /reports, /profile, etc.)
+├── components/     # Componentes React (UI, layout, formularios, gráficos, auth, perfil)
 ├── lib/
 │   ├── hooks/      # Hooks de estado (useTicketStore, useUserStore, useAuthStore)
 │   ├── types.ts    # Definiciones TypeScript
@@ -72,25 +76,30 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 ## ✨ Funcionalidades Detalladas
 
 ### 🔑 Autenticación (Simulada)
-*   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando un email y contraseña. La validación se hace contra los usuarios almacenados en `localStorage`.
+*   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando un email y contraseña. La validación se hace contra los usuarios almacenados en `localStorage` (gestidos por `useUserStore`).
 *   **Creación de Usuarios:** Desde `/admin/users/create`, se pueden crear nuevos usuarios especificando nombre, email y contraseña.
 *   **Cierre de Sesión:** Un botón en la barra lateral permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
 *   **Protección de Rutas:** Un componente `AuthGuard` redirige a los usuarios no autenticados a la página de login si intentan acceder a rutas protegidas.
 
+### 👤 Gestión de Perfil de Usuario
+*   **Página "Mi Perfil" (`/profile`):** Accesible desde la barra lateral una vez autenticado.
+*   **Visualización y Edición:** Muestra el nombre y correo electrónico del usuario actual. Permite editar el nombre.
+*   **Persistencia:** Los cambios en el nombre se guardan en `localStorage` a través de `useUserStore` y se reflejan en el estado de `useAuthStore`.
+
 ### 🎫 Gestión de Tickets
-*   **Dashboard Principal (`/`):** Muestra una lista/grilla de todos los tickets (requiere inicio de sesión). Filtros por término, estado y prioridad.
+*   **Dashboard Principal (`/`):** Muestra una lista/grilla de todos los tickets (requiere inicio de sesión). Filtros por término, estado y prioridad. Permite cambiar entre vista de grilla y lista.
 *   **Creación de Tickets (`/tickets/create`):** Formulario con asistencia IA para categoría/prioridad.
-*   **Edición de Tickets (`/tickets/[id]/edit`):** Permite modificar los detalles de un ticket haciendo clic en su ID.
+*   **Edición de Tickets (`/tickets/[id]/edit`):** Permite modificar los detalles de un ticket haciendo clic en su ID (visible en vistas de tarjeta y lista).
 
 ### 📊 Informes
-*   **Página de Informes (`/reports`):** Dashboard con gráficos interactivos sobre tickets. Permite filtrar y exportar datos a PDF/Excel.
+*   **Página de Informes (`/reports`):** Dashboard con gráficos interactivos sobre tickets. Permite filtrar por estado y prioridad, cambiar vistas de gráficos y exportar datos a PDF/Excel.
 
-### 👥 Gestión de Usuarios
+### 👥 Gestión de Usuarios (Admin)
 *   **Listado de Usuarios (`/admin/users`):** Tabla con usuarios registrados.
 *   **Creación de Usuarios (`/admin/users/create`):** Formulario para añadir usuarios con nombre, email y contraseña.
 
 ### ⚙️ Configuración
-*   **Página de Configuración (`/settings`):** Permite cambiar el tema de la aplicación (claro/oscuro).
+*   **Página de Configuración (`/settings`):** Muestra el nombre del usuario actual (solo lectura). Permite cambiar el tema de la aplicación (claro/oscuro) y gestionar (simuladamente) preferencias de notificación.
 *   **Cabecera Principal:** Incluye un interruptor rápido para el tema claro/oscuro.
 
 ### 🤖 Flujo de IA con Genkit
@@ -108,16 +117,20 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
     npm install
     ```
 3.  **Configurar Variables de Entorno (IA - Genkit):**
-    *   Crea un archivo `.env.local` si necesitas una `GOOGLE_API_KEY`.
+    *   Crea un archivo `.env.local` si necesitas una `GOOGLE_API_KEY` para usar Genkit con los modelos de Google.
+        ```
+        GOOGLE_API_KEY=TU_API_KEY_DE_GOOGLE_AI
+        ```
 4.  **Ejecutar el Servidor de Desarrollo:**
     ```bash
     npm run dev
     ```
-    La aplicación estará en `http://localhost:9002`.
-5.  **Ejecutar el Inspector de Genkit (Opcional):**
+    La aplicación estará en `http://localhost:9002` (o el puerto que tengas configurado).
+5.  **Ejecutar el Inspector de Genkit (Opcional, para depurar flujos IA):**
     ```bash
     npm run genkit:dev
     ```
+    El inspector estará en `http://localhost:4000`.
 
 ---
 ¡Disfruta de DevTrack Lite!

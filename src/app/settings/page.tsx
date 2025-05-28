@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { useAuthStore } from "@/lib/hooks/useAuthStore"; // Importar useAuthStore
 
 export default function SettingsPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { currentUser } = useAuthStore(); // Obtener currentUser
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
@@ -44,7 +46,8 @@ export default function SettingsPage() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="username">Nombre de usuario</Label>
-            <Input id="username" placeholder="Tu nombre de usuario" defaultValue="DevUser" />
+            {/* Mostrar el nombre del usuario actual o un placeholder */}
+            <Input id="username" placeholder="Nombre de usuario" value={currentUser?.name || "N/A"} readOnly />
           </div>
           
           <Separator />
