@@ -22,14 +22,13 @@
 *   🔑 **Autenticación (Simulada):**
     *   Página de inicio de sesión con validación de email y contraseña.
     *   Creación de usuarios con nombre, email y contraseña.
-    *   Funcionalidad de "Cerrar Sesión" desde el menú de perfil en la cabecera.
+    *   Funcionalidad de "Cerrar Sesión" desde el menú de perfil en la barra lateral.
     *   Protección básica de rutas.
 *   👤 **Gestión de Perfil de Usuario:**
     *   Página "Mi Perfil" (`/profile`).
     *   Permite al usuario autenticado ver y editar su nombre.
     *   Permite subir y cambiar la imagen de perfil (guardada como Data URL).
     *   Muestra el email (solo lectura).
-    *   Menú de perfil en la cabecera con acceso rápido a perfil, configuración y cierre de sesión.
 *   🌓 **Tema Claro y Oscuro:** Cambia entre un tema visual claro y oscuro para mayor comodidad, con un interruptor accesible en la cabecera y en la página de configuración.
 *   👥 **Gestión de Usuarios (Admin):** Crea y visualiza usuarios en el sistema desde una sección de administración.
 *   🇪🇸 **Interfaz en Español:** Toda la aplicación está diseñada pensando en el usuario de habla hispana.
@@ -58,6 +57,7 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
     *   **Zod:** Validación de esquemas para formularios y datos.
 *   **Persistencia de Datos (Prototipo):**
     *   **`localStorage` del Navegador:** Para simular la persistencia de tickets, usuarios, sesión de usuario e imágenes de perfil (como Data URLs).
+    *   **Usuarios Predeterminados (Seed):** Para la versión desplegada (ej. en Vercel), la aplicación se inicializa con usuarios predeterminados desde un archivo JSON (`src/lib/data/seed-users.json`) si `localStorage` está vacío. Esto permite probar el login en entornos sin estado.
 *   **Exportación de Datos:**
     *   **`jspdf` y `jspdf-autotable`:** Para la generación de informes en PDF.
     *   **`xlsx` (SheetJS):** Para la generación de informes en formato Excel.
@@ -69,6 +69,7 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 ├── app/            # Rutas (incluyendo /login, /admin, /reports, /profile, etc.)
 ├── components/     # Componentes React (UI, layout, formularios, gráficos, auth, perfil)
 ├── lib/
+│   ├── data/       # Datos semilla (ej. seed-users.json)
 │   ├── hooks/      # Hooks de estado (useTicketStore, useUserStore, useAuthStore)
 │   ├── types.ts    # Definiciones TypeScript
 │   └── utils.ts    # Utilidades generales
@@ -79,12 +80,13 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 
 ### 🔑 Autenticación (Simulada)
 *   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando un email y contraseña. La validación se hace contra los usuarios almacenados en `localStorage` (gestidos por `useUserStore`).
-*   **Creación de Usuarios:** Desde `/admin/users/create`, se pueden crear nuevos usuarios especificando nombre, email y contraseña.
-*   **Cerrar Sesión:** Un botón en el menú de perfil (ubicado ahora en el pie de la barra lateral cuando está expandida, o como un menú desplegable desde el avatar en modo ícono) permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
+    *   **Usuarios Predeterminados para Despliegue:** En entornos como Vercel, si no hay usuarios en `localStorage`, se cargarán usuarios de demostración (ej. `demo@example.com` / `password123`) desde un archivo `seed-users.json` para permitir el inicio de sesión.
+*   **Creación de Usuarios:** Desde `/admin/users/create`, se pueden crear nuevos usuarios especificando nombre, email y contraseña. Estos usuarios se guardan en `localStorage`. En un entorno desplegado, estos usuarios creados solo existirán en el navegador del visitante actual.
+*   **Cerrar Sesión:** Un botón en el menú de perfil (ubicado en el pie de la barra lateral) permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
 *   **Protección de Rutas:** Un componente `AuthGuard` redirige a los usuarios no autenticados a la página de login si intentan acceder a rutas protegidas.
 
 ### 👤 Gestión de Perfil de Usuario
-*   **Menú de Perfil en Barra Lateral/Cabecera:** Un avatar en el pie de la barra lateral (o en la cabecera, dependiendo de la implementación final tras ajustes) despliega un menú con el nombre/email del usuario, y enlaces a "Mi Perfil", "Configuración" y "Cerrar Sesión".
+*   **Menú de Perfil en Barra Lateral:** Un avatar en el pie de la barra lateral despliega un menú con el nombre/email del usuario, y enlaces a "Mi Perfil", "Configuración" y "Cerrar Sesión".
 *   **Página "Mi Perfil" (`/profile`):** Accesible desde el menú de perfil.
     *   **Visualización y Edición:** Muestra el nombre, correo electrónico y avatar del usuario actual.
     *   **Cambio de Nombre:** Permite editar el nombre del usuario.
