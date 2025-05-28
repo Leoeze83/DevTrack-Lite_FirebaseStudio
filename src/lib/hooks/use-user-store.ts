@@ -10,7 +10,7 @@ const USERS_STORAGE_KEY = "devtrack_users_v_zustand";
 interface UserStoreState {
   users: User[];
   isInitialized: boolean;
-  addUser: (newUserData: Omit<User, "id" | "createdAt" | "avatarUrl"> & { password?: string }) => User;
+  addUser: (newUserData: Omit<User, "id" | "createdAt"> & { password?: string }) => User;
   getUsers: () => User[];
   getUserById: (id: string) => User | undefined;
 }
@@ -19,15 +19,15 @@ export const useUserStore = create<UserStoreState>()(
   persist(
     (set, get) => ({
       users: [],
-      isInitialized: false, // Comienza como false
+      isInitialized: false, // Estado inicial
       addUser: (newUserData) => {
         const newUser: User = {
           name: newUserData.name,
           email: newUserData.email,
-          password: newUserData.password,
+          password: newUserData.password, // Guardar contraseña
           id: crypto.randomUUID(),
           createdAt: new Date().toISOString(),
-          // avatarUrl puede ser añadido aquí si se pasa en newUserData
+          avatarUrl: `https://placehold.co/100x100.png?text=${newUserData.name.charAt(0)}` // Avatar placeholder básico
         };
         set((state) => ({
           users: [newUser, ...state.users].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -44,24 +44,18 @@ export const useUserStore = create<UserStoreState>()(
     {
       name: USERS_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      // onRehydrateStorage se llama después de que el estado ha sido rehidratado.
-      // La función que devolvemos aquí se ejecutará después de la rehidratación.
-      onRehydrateStorage: () => {
-        return (state, error) => {
-          if (error) {
-            console.error("UserStore: ocurrió un error durante la rehidratación", error);
-          }
-          // Establecer isInitialized a true después de que la rehidratación haya ocurrido
-          // Esto asegura que cualquier componente que dependa de isInitialized se actualice.
-          // Usamos setState directamente del store aquí.
+      onRehydrateStorage: (_state, error) => { // El primer argumento es el estado rehidratado, no lo necesitamos aquí.
+        if (error) {
+          console.error("UserStore: ocurrió un error durante la rehidratación", error);
+        }
+        // Aplazar la configuración de isInitialized a true hasta después del tick actual de JS,
+        // asegurando que useUserStore esté completamente asignado.
+        setTimeout(() => {
           useUserStore.setState({ isInitialized: true });
-        };
+        }, 0);
       },
     }
   )
 );
 
-// Para el caso inicial donde localStorage podría estar vacío,
-// la primera vez onRehydrateStorage se llamará con el estado inicial (isInitialized: false).
-// Luego, setState({ isInitialized: true }) actualizará el estado.
-// Los componentes que leen isInitialized reaccionarán a este cambio.
+    
