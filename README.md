@@ -28,6 +28,7 @@
     *   Página "Mi Perfil" (`/profile`).
     *   Permite al usuario autenticado ver y editar su nombre.
     *   Permite subir y cambiar la imagen de perfil (guardada como Data URL).
+    *   Permite cambiar la contraseña (requiere contraseña actual).
     *   Muestra el email (solo lectura).
 *   🌓 **Tema Claro y Oscuro:** Cambia entre un tema visual claro y oscuro para mayor comodidad, con un interruptor accesible en la cabecera y en la página de configuración.
 *   👥 **Gestión de Usuarios (Admin):** Crea y visualiza usuarios en el sistema desde una sección de administración.
@@ -63,7 +64,7 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
     *   **`xlsx` (SheetJS):** Para la generación de informes en formato Excel.
 
 ### 🏗️ Estructura del Proyecto (Simplificada)
-```
+\`\`\`
 /src
 ├── ai/             # Lógica de IA con Genkit
 ├── app/            # Rutas (incluyendo /login, /admin, /reports, /profile, etc.)
@@ -74,7 +75,7 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 │   ├── types.ts    # Definiciones TypeScript
 │   └── utils.ts    # Utilidades generales
 └── ... (otros archivos de configuración)
-```
+\`\`\`
 
 ## ✨ Funcionalidades Detalladas
 
@@ -93,8 +94,9 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
     *   **Visualización y Edición:** Muestra el nombre, correo electrónico y avatar del usuario actual.
     *   **Cambio de Nombre:** Permite editar el nombre del usuario.
     *   **Cambio de Avatar:** Permite al usuario seleccionar un archivo de imagen (PNG, JPG, GIF). La imagen se convierte a Data URL, se muestra una vista previa y se guarda en `localStorage`.
+    *   **Cambio de Contraseña:** Permite al usuario cambiar su contraseña, requiriendo la contraseña actual y la confirmación de la nueva.
     *   **Email (Solo Lectura):** El correo electrónico no se puede modificar desde esta interfaz.
-*   **Persistencia:** Los cambios en el nombre y avatar se guardan en `localStorage` a través de `useUserStore` y se reflejan en el estado de `useAuthStore`.
+*   **Persistencia:** Los cambios en el nombre, avatar y contraseña se guardan en `localStorage` a través de `useUserStore` y se reflejan en el estado de `useAuthStore`.
 
 ### 🎫 Gestión de Tickets
 *   **Dashboard Principal (`/`):** Muestra una lista/grilla de todos los tickets (requiere inicio de sesión). Filtros por término, estado y prioridad. Permite cambiar entre vista de grilla y lista.
@@ -118,29 +120,31 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 ## 🚀 Primeros Pasos
 
 1.  **Clonar el Repositorio:**
-    ```bash
+    \`\`\`bash
     git clone https://github.com/TU_USUARIO/NOMBRE_DE_TU_REPO.git
     cd NOMBRE_DE_TU_REPO
-    ```
+    \`\`\`
 2.  **Instalar Dependencias:**
-    ```bash
+    \`\`\`bash
     npm install
-    ```
+    \`\`\`
 3.  **Configurar Variables de Entorno (IA - Genkit):**
     *   Crea un archivo `.env.local` si necesitas una `GOOGLE_API_KEY` para usar Genkit con los modelos de Google.
-        ```
+        \`\`\`
         GOOGLE_API_KEY=TU_API_KEY_DE_GOOGLE_AI
-        ```
+        \`\`\`
 4.  **Ejecutar el Servidor de Desarrollo:**
-    ```bash
+    \`\`\`bash
     npm run dev
-    ```
+    \`\`\`
     La aplicación estará en `http://localhost:9002` (o el puerto que tengas configurado).
 5.  **Ejecutar el Inspector de Genkit (Opcional, para depurar flujos IA):**
-    ```bash
+    \`\`\`bash
     npm run genkit:dev
-    ```
+    \`\`\`
     El inspector estará en `http://localhost:4000`.
 
 ---
 ¡Disfruta de DevTrack Lite!
+
+    

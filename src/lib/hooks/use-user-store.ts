@@ -12,14 +12,19 @@ interface UserStoreState {
   users: User[];
   isInitialized: boolean;
   addUser: (newUserData: Omit<User, "id" | "createdAt"> & { password?: string }) => User;
-  updateUser: (userId: string, dataToUpdate: Partial<Omit<User, "id" | "createdAt" | "email">>) => User | undefined;
+  updateUser: (
+    userId: string, 
+    dataToUpdate: Partial<Omit<User, "id" | "createdAt" | "email">>, // 'password' aquí sería la nueva contraseña
+    currentPasswordForVerification?: string
+  ) => User | undefined | { error: string };
   getUsers: () => User[];
   getUserById: (id: string) => User | undefined;
-  _setIsInitialized: (initialized: boolean) => void;
+  _setIsInitialized: (initialized: boolean) => void; // Para uso interno por persistencia
 }
 
 const getInitialUsers = (): User[] => {
   if (typeof window === 'undefined') {
+    console.log("UserStore: Entorno de servidor, devolviendo array vacío para usuarios iniciales.");
     return [];
   }
   try {
@@ -33,10 +38,11 @@ const getInitialUsers = (): User[] => {
       }
     }
   } catch (error) {
-    console.error("Error al leer usuarios de localStorage en getInitialUsers:", error);
-    localStorage.removeItem(USERS_STORAGE_KEY);
+    console.error("UserStore: Error al leer usuarios de localStorage en getInitialUsers:", error);
+    localStorage.removeItem(USERS_STORAGE_KEY); // Limpiar si está corrupto
   }
   
+  // Si localStorage está vacío o corrupto, cargar desde seed
   const initialSeedUsers = seedUsersData.map(user => ({...user, createdAt: user.createdAt || new Date().toISOString()}));
   return initialSeedUsers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 };
@@ -46,35 +52,74 @@ export const useUserStore = create<UserStoreState>()(
   persist(
     (set, get) => ({
       users: getInitialUsers(),
-      isInitialized: false, // Inicialmente no inicializado
+      isInitialized: false, 
+      
       addUser: (newUserData) => {
         const newUser: User = {
           name: newUserData.name,
           email: newUserData.email,
-          password: newUserData.password, // Guardar contraseña
+          password: newUserData.password, 
           id: crypto.randomUUID(),
           createdAt: new Date().toISOString(),
-          avatarUrl: `https://placehold.co/100x100.png?text=${newUserData.name.charAt(0).toUpperCase()}&data-ai-hint=avatar+placeholder`
+          avatarUrl: newUserData.avatarUrl || `https://placehold.co/100x100.png?text=${newUserData.name.charAt(0).toUpperCase()}&data-ai-hint=avatar+placeholder`
         };
         set((state) => ({
           users: [newUser, ...state.users].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         }));
         return newUser;
       },
-      updateUser: (userId, dataToUpdate) => {
+
+      updateUser: (userId, dataToUpdate, currentPasswordForVerification) => {
         let updatedUser: User | undefined = undefined;
+        let errorResult: { error: string } | undefined = undefined;
+
         set((state) => {
-          const newUsers = state.users.map(user => {
-            if (user.id === userId) {
-              updatedUser = { ...user, ...dataToUpdate, updatedAt: new Date().toISOString() };
-              return updatedUser;
+          const userIndex = state.users.findIndex(user => user.id === userId);
+          if (userIndex === -1) {
+            console.warn(`UserStore: Usuario con ID ${userId} no encontrado para actualizar.`);
+            return state; // No modificar el estado si el usuario no se encuentra
+          }
+
+          const userToUpdate = state.users[userIndex];
+          const updates = { ...dataToUpdate };
+
+          // Lógica para cambio de contraseña
+          if (updates.password) { // 'password' en updates es la NUEVA contraseña
+            if (!currentPasswordForVerification) {
+              errorResult = { error: "Se requiere la contraseña actual para cambiarla." };
+              return state; // No actualiza si falta la contraseña actual
             }
-            return user;
-          });
+            if (userToUpdate.password !== currentPasswordForVerification) {
+              errorResult = { error: "La contraseña actual es incorrecta." };
+              return state; // No actualiza si la contraseña actual no coincide
+            }
+            // Si la verificación es exitosa, la nueva contraseña en 'updates.password' se aplicará.
+          } else {
+            // Si no se está actualizando la contraseña, nos aseguramos de no borrarla accidentalmente.
+            // 'updates' ya no contendrá 'password' o será undefined si no se está cambiando.
+            // Sin embargo, si 'password' está explícitamente en dataToUpdate pero es undefined/null,
+            // podría interpretarse como "borrar contraseña", lo cual no queremos aquí.
+            // El tipo de dataToUpdate es Partial, así que si password no está, no se toca.
+          }
+          
+          if (errorResult) return state; // Detener si hubo un error de contraseña
+
+          updatedUser = { 
+            ...userToUpdate, 
+            ...updates, // Aplicar todos los cambios (nombre, avatar, nueva contraseña si pasó la verificación)
+            updatedAt: new Date().toISOString() 
+          };
+          
+          const newUsers = [...state.users];
+          newUsers[userIndex] = updatedUser;
+          
           return { users: newUsers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) };
         });
+
+        if (errorResult) return errorResult;
         return updatedUser;
       },
+      
       getUsers: () => {
         return get().users;
       },
@@ -88,14 +133,46 @@ export const useUserStore = create<UserStoreState>()(
     {
       name: USERS_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: (persistedState, error) => {
-        if (error) {
-          console.error("UserStore: Error durante la rehidratación desde localStorage", error);
-        }
-        setTimeout(() => {
-          useUserStore.getState()._setIsInitialized(true);
-        }, 0);
+      onRehydrateStorage: () => {
+        return (state, error) => {
+          if (error) {
+            console.error("UserStore: Error durante la rehidratación desde localStorage", error);
+          }
+          // Aplazar la configuración de isInitialized para asegurar que el store esté completamente listo
+          setTimeout(() => {
+            if (useUserStore.getState()._setIsInitialized) {
+               useUserStore.getState()._setIsInitialized(true);
+            }
+          }, 0);
+        };
       },
     }
   )
 );
+
+// Sincronizar el estado de carga inicial a nivel de módulo
+// Esto se asegura de que isInitialized se establezca en true una vez que la persistencia se haya rehidratado
+if (typeof window !== 'undefined') {
+  // Usamos setTimeout para asegurar que la suscripción ocurra después de que el store esté completamente inicializado
+  setTimeout(() => {
+    if (useUserStore.persist && typeof useUserStore.persist.onFinishHydration === 'function') {
+      const unsub = useUserStore.persist.onFinishHydration((state) => {
+        if (state && typeof state._setIsInitialized === 'function') {
+          state._setIsInitialized(true);
+        } else {
+          // Fallback si state no tiene _setIsInitialized, aunque no debería pasar con el diseño actual.
+          // Es más seguro llamar a getState() para acceder al store después de la hidratación.
+          useUserStore.getState()._setIsInitialized(true);
+        }
+        unsub(); // Solo necesitamos esto una vez
+      });
+    } else {
+      // Fallback si onFinishHydration no está disponible inmediatamente (puede pasar en algunos escenarios de SSR/CSR)
+      // o si persist no está listo
+      console.warn("UserStore: onFinishHydration no disponible inmediatamente. Usando fallback para isInitialized.");
+      useUserStore.getState()._setIsInitialized(true);
+    }
+  }, 0);
+}
+
+    
