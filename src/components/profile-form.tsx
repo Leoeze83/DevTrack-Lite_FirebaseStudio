@@ -26,7 +26,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export function ProfileForm() {
   const { currentUser, updateCurrentUserData, isAuthLoading } = useAuthStore();
-  const { updateUser } = useUserStore();
+  const userStore = useUserStore(); // Acceder al store completo
   const { toast } = useToast();
   const router = useRouter();
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
@@ -97,24 +97,31 @@ export function ProfileForm() {
     }
 
     try {
-      const updateData: Partial<Omit<ProfileFormValues, "email">> = { name: data.name };
-      if (form.formState.dirtyFields.avatarUrl && data.avatarUrl) { // Solo actualizar si el avatar cambió
-        updateData.avatarUrl = data.avatarUrl;
-      } else if (!data.avatarUrl && currentUser.avatarUrl) { // Si se borró el avatar
-        updateData.avatarUrl = ""; // O undefined, dependiendo de cómo quieras manejarlo
+      // Prepara los datos a actualizar, omitiendo el email
+      const dataToUpdateStore: Partial<Omit<ProfileFormValues, "email">> = { name: data.name };
+      if (form.formState.dirtyFields.avatarUrl && data.avatarUrl) { 
+        dataToUpdateStore.avatarUrl = data.avatarUrl;
+      } else if (!data.avatarUrl && currentUser.avatarUrl) { 
+        dataToUpdateStore.avatarUrl = ""; 
       }
 
-
-      const updatedUserInDb = updateUser(currentUser.id, updateData);
+      // Llama a updateUser desde la instancia del store
+      const updatedUserInDb = userStore.updateUser(currentUser.id, dataToUpdateStore);
 
       if (updatedUserInDb) {
-        updateCurrentUserData(updateData);
+        // Prepara los datos para actualizar el currentUser en AuthStore
+        const authUpdateData: Partial<Omit<ProfileFormValues, "email">> = {name: updatedUserInDb.name};
+        if (updatedUserInDb.avatarUrl !== undefined) { // Comprobar si avatarUrl se actualizó
+            authUpdateData.avatarUrl = updatedUserInDb.avatarUrl;
+        }
+        
+        updateCurrentUserData(authUpdateData);
         
         toast({
           title: "¡Perfil Actualizado!",
           description: "Tu información ha sido actualizada exitosamente.",
         });
-        form.reset({}, { keepValues: true, keepDirty: false, keepDefaultValues: false }); // Reset dirty state
+        form.reset({}, { keepValues: true, keepDirty: false, keepDefaultValues: false }); 
       } else {
          toast({
           title: "Error de Actualización",
@@ -168,7 +175,7 @@ export function ProfileForm() {
           <CardContent className="space-y-6">
             <div className="flex flex-col items-center space-y-4">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={selectedImagePreview || currentUser.avatarUrl} alt={currentUser.name} />
+                <AvatarImage src={selectedImagePreview || currentUser.avatarUrl} alt={currentUser.name} data-ai-hint="user avatar" />
                 <AvatarFallback className="text-3xl">{getUserInitials(currentUser.name)}</AvatarFallback>
               </Avatar>
               <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
@@ -235,3 +242,4 @@ export function ProfileForm() {
     </Card>
   );
 }
+
