@@ -8,7 +8,7 @@
 [![ShadCN UI](https://img.shields.io/badge/ShadCN_UI-Jazmín-black?style=for-the-badge&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/)
 [![Genkit](https://img.shields.io/badge/Genkit_AI-Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/docs/genkit)
 
-**DevTrack Lite** es una aplicación web moderna y ágil, diseñada para simplificar la gestión de tickets de soporte y el seguimiento del tiempo. Potenciada con Inteligencia Artificial para la categorización automática, ofrece una experiencia de usuario fluida y eficiente.
+**DevTrack Lite** es una aplicación web moderna y ágil, diseñada para simplificar la gestión de tickets de soporte y el seguimiento del tiempo. Potenciada con Inteligencia Artificial para la categorización automática, ofrece una experiencia de usuario fluida y eficiente, ahora con un sistema básico de autenticación.
 
 ## 🌟 Características Principales
 
@@ -19,10 +19,15 @@
     *   Visualiza tickets por estado, prioridad, tendencias de creación y tiempo registrado.
     *   Filtra los datos para análisis específicos.
     *   Exporta informes a PDF y Excel.
-*   🌓 **Tema Claro y Oscuro:** Cambia entre un tema visual claro y oscuro para mayor comodidad.
-*   👥 **Gestión Básica de Usuarios:** Crea y visualiza usuarios en el sistema.
+*   🔑 **Autenticación (Simulada):**
+    *   Página de inicio de sesión.
+    *   Creación de usuarios con contraseña.
+    *   Funcionalidad de "Cerrar Sesión".
+    *   Protección básica de rutas.
+*   🌓 **Tema Claro y Oscuro:** Cambia entre un tema visual claro y oscuro para mayor comodidad, con un interruptor accesible en la cabecera.
+*   👥 **Gestión de Usuarios:** Crea y visualiza usuarios en el sistema, ahora con campo de contraseña.
 *   🇪🇸 **Interfaz en Español:** Toda la aplicación está diseñada pensando en el usuario de habla hispana.
-*   📱 **Diseño Responsivo:** Adaptable a diferentes tamaños de pantalla, desde móviles hasta escritorio.
+*   📱 **Diseño Responsivo:** Adaptable a diferentes tamaños de pantalla.
 
 ## 🛠️ Tecnologías y Arquitectura
 
@@ -34,9 +39,11 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
     *   **TypeScript:** Para un desarrollo robusto y tipado seguro.
 *   **Estilos:**
     *   **Tailwind CSS:** Framework CSS utility-first para un diseño rápido y personalizable.
-    *   **ShadCN UI:** Colección de componentes de UI reutilizables, construidos sobre Radix UI y Tailwind CSS.
+    *   **ShadCN UI:** Colección de componentes de UI reutilizables.
 *   **Inteligencia Artificial:**
     *   **Genkit (con Google Gemini):** Para la categorización y priorización automática de tickets.
+*   **Gestión de Estado:**
+    *   **Zustand:** Para la gestión del estado global (tickets, usuarios, autenticación).
 *   **Iconografía:**
     *   **Lucide React:** Librería de iconos SVG ligeros y personalizables.
 *   **Gráficos:**
@@ -44,139 +51,73 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 *   **Validación de Datos:**
     *   **Zod:** Validación de esquemas para formularios y datos.
 *   **Persistencia de Datos (Prototipo):**
-    *   **`localStorage` del Navegador:** Para simular la persistencia de tickets y usuarios durante la fase de prototipado.
+    *   **`localStorage` del Navegador:** Para simular la persistencia de tickets, usuarios y sesión de usuario.
 *   **Exportación de Datos:**
     *   **`jspdf` y `jspdf-autotable`:** Para la generación de informes en PDF.
     *   **`xlsx` (SheetJS):** Para la generación de informes en formato Excel.
-*   **Testing:**
-    *   **Jest:** Framework de pruebas de JavaScript.
-    *   **React Testing Library:** Para probar componentes React de forma centrada en el usuario.
 
-### 🏗️ Estructura del Proyecto
-
-La aplicación sigue una estructura organizada para facilitar el desarrollo y mantenimiento:
-
+### 🏗️ Estructura del Proyecto (Simplificada)
 ```
-/
-├── public/             # Archivos estáticos (favicon, etc.)
-├── src/
-│   ├── ai/             # Lógica de Inteligencia Artificial con Genkit
-│   │   ├── flows/      # Flujos de Genkit (ej. categorizar ticket)
-│   │   └── genkit.ts   # Configuración de Genkit
-│   ├── app/            # Rutas, páginas y layouts del App Router de Next.js
-│   │   ├── admin/      # Sección de administración (ej. gestión de usuarios)
-│   │   ├── reports/    # Página de informes
-│   │   ├── settings/   # Página de configuración
-│   │   ├── tickets/    # Páginas relacionadas con tickets (crear, editar)
-│   │   ├── globals.css # Estilos globales y variables de tema (Tailwind)
-│   │   ├── layout.tsx  # Layout principal de la aplicación
-│   │   └── page.tsx    # Página de inicio (dashboard de tickets)
-│   ├── components/     # Componentes React reutilizables
-│   │   ├── charts/     # Componentes específicos para gráficos
-│   │   ├── layout/     # Componentes de estructura (header, sidebar)
-│   │   └── ui/         # Componentes de UI de ShadCN (button, card, etc.)
-│   ├── hooks/          # Hooks personalizados (ej. useToast, useMobile)
-│   ├── lib/            # Utilidades, tipos y lógica de datos compartida
-│   │   ├── hooks/      # Hooks de estado global (useTicketStore, useUserStore)
-│   │   ├── types.ts    # Definiciones de tipos TypeScript
-│   │   └── utils.ts    # Funciones de utilidad (ej. cn para classnames)
-│   ├── tests/          # (Opcional, si se mueven fuera de __tests__)
-│   └── __mocks__/      # Mocks para Jest (ej. lucide-react)
-├── .env                # Variables de entorno (no versionadas)
-├── .gitignore          # Archivos ignorados por Git
-├── components.json     # Configuración de ShadCN UI
-├── jest.config.js      # Configuración de Jest
-├── jest.setup.js       # Configuración adicional para Jest
-├── next.config.ts      # Configuración de Next.js
-├── package.json        # Dependencias y scripts del proyecto
-├── tailwind.config.ts  # Configuración de Tailwind CSS
-├── tsconfig.json       # Configuración de TypeScript
-└── README.md           # ¡Este archivo!
+/src
+├── ai/             # Lógica de IA con Genkit
+├── app/            # Rutas (incluyendo /login, /admin, /reports, etc.)
+├── components/     # Componentes React (UI, layout, formularios, gráficos, auth)
+├── lib/
+│   ├── hooks/      # Hooks de estado (useTicketStore, useUserStore, useAuthStore)
+│   ├── types.ts    # Definiciones TypeScript
+│   └── utils.ts    # Utilidades generales
+└── ... (otros archivos de configuración)
 ```
 
 ## ✨ Funcionalidades Detalladas
 
+### 🔑 Autenticación (Simulada)
+*   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando un email y contraseña. La validación se hace contra los usuarios almacenados en `localStorage`.
+*   **Creación de Usuarios:** Desde `/admin/users/create`, se pueden crear nuevos usuarios especificando nombre, email y contraseña.
+*   **Cierre de Sesión:** Un botón en la barra lateral permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
+*   **Protección de Rutas:** Un componente `AuthGuard` redirige a los usuarios no autenticados a la página de login si intentan acceder a rutas protegidas.
+
 ### 🎫 Gestión de Tickets
-*   **Dashboard Principal (`/`):** Muestra una lista de todos los tickets. Permite cambiar entre vista de tarjetas (grid) y vista de tabla (list). Incluye filtros por término de búsqueda, estado y prioridad.
-*   **Creación de Tickets (`/tickets/create`):** Formulario intuitivo para crear nuevos tickets. Incluye campos para título, descripción, categoría y prioridad.
-    *   **Asistencia IA:** Botón "IA Auto-Categorizar y Priorizar" que utiliza Genkit para sugerir categoría y prioridad basado en la descripción.
-*   **Edición de Tickets (`/tickets/[id]/edit`):** Permite modificar los detalles de un ticket existente. Se accede haciendo clic en el ID del ticket.
-*   **Registro de Tiempo:** Cada ticket permite registrar el tiempo dedicado. Un diálogo modal facilita la entrada de duración y notas.
-*   **Cambio de Estado:** Se puede cambiar el estado de un ticket (Abierto, En Progreso, Pendiente, Resuelto, Cerrado) directamente desde la lista o tarjeta del ticket.
+*   **Dashboard Principal (`/`):** Muestra una lista/grilla de todos los tickets (requiere inicio de sesión). Filtros por término, estado y prioridad.
+*   **Creación de Tickets (`/tickets/create`):** Formulario con asistencia IA para categoría/prioridad.
+*   **Edición de Tickets (`/tickets/[id]/edit`):** Permite modificar los detalles de un ticket haciendo clic en su ID.
 
 ### 📊 Informes
-*   **Página de Informes (`/reports`):** Un dashboard dedicado a la visualización de métricas de tickets.
-    *   **Gráficos Interactivos:**
-        *   Tickets por Estado (Gráfico de Torta o Barras)
-        *   Tickets por Prioridad (Gráfico de Barras)
-        *   Tendencia de Creación de Tickets (Gráfico de Líneas, agrupable por día/semana/mes)
-        *   Resumen de Tiempo Registrado (Gráfico de Barras, agrupable por categoría/prioridad/estado)
-    *   **Filtros:** Permite filtrar los datos de los gráficos por estado y prioridad del ticket.
-    *   **Exportación:**
-        *   Descarga los datos de los tickets filtrados en formato **PDF**.
-        *   Descarga los datos de los tickets filtrados en formato **Excel (.xlsx)**.
-    *   **Vistas Detalladas:** Opción para enfocar en un gráfico específico y verlo en un tamaño mayor con más detalles/opciones.
+*   **Página de Informes (`/reports`):** Dashboard con gráficos interactivos sobre tickets. Permite filtrar y exportar datos a PDF/Excel.
 
 ### 👥 Gestión de Usuarios
-*   **Listado de Usuarios (`/admin/users`):** Muestra una tabla con los usuarios registrados (nombre, email, fecha de creación).
-*   **Creación de Usuarios (`/admin/users/create`):** Formulario para añadir nuevos usuarios al sistema.
+*   **Listado de Usuarios (`/admin/users`):** Tabla con usuarios registrados.
+*   **Creación de Usuarios (`/admin/users/create`):** Formulario para añadir usuarios con nombre, email y contraseña.
 
 ### ⚙️ Configuración
-*   **Página de Configuración (`/settings`):**
-    *   **Cambio de Tema:** Interruptor para alternar entre el tema claro y oscuro de la aplicación. La preferencia se guarda en `localStorage`.
-    *   (Placeholder para futuras configuraciones como notificaciones, perfil de usuario, etc.)
+*   **Página de Configuración (`/settings`):** Permite cambiar el tema de la aplicación (claro/oscuro).
+*   **Cabecera Principal:** Incluye un interruptor rápido para el tema claro/oscuro.
 
 ### 🤖 Flujo de IA con Genkit
-*   **`categorizeTicket`:**
-    *   **Archivo:** `src/ai/flows/categorize-ticket.ts`
-    *   **Propósito:** Recibe el contenido (descripción) de un ticket y utiliza un modelo de lenguaje (Gemini a través de Google AI) para determinar y sugerir:
-        *   `tags`: Etiquetas relevantes para el ticket.
-        *   `category`: La categoría más apropiada (ej. "Bug", "Mejora").
-        *   `priority`: La prioridad sugerida (`low`, `medium`, `high`).
-    *   **Integración:** Se invoca desde el formulario de creación de tickets para asistir al usuario.
+*   **`categorizeTicket`:** Analiza la descripción de un ticket para sugerir categoría y prioridad.
 
 ## 🚀 Primeros Pasos
-
-Para poner en marcha este proyecto en tu entorno local:
 
 1.  **Clonar el Repositorio:**
     ```bash
     git clone https://github.com/TU_USUARIO/NOMBRE_DE_TU_REPO.git
     cd NOMBRE_DE_TU_REPO
     ```
-
 2.  **Instalar Dependencias:**
-    Asegúrate de tener Node.js (v18 o superior) y npm/yarn instalados.
     ```bash
     npm install
-    # o
-    # yarn install
     ```
-
 3.  **Configurar Variables de Entorno (IA - Genkit):**
-    *   Crea un archivo `.env.local` en la raíz del proyecto.
-    *   Añade tu clave API de Google AI Studio para Genkit (si es necesario para el modelo que estés usando):
-        ```env
-        GOOGLE_API_KEY=TU_API_KEY_DE_GOOGLE_AI
-        ```
-    *   *Nota: El modelo `gemini-2.0-flash` configurado actualmente puede funcionar sin API key explícita en ciertos entornos de Firebase/Google Cloud, pero es buena práctica tenerla configurada si se desarrolla localmente o se despliega fuera de estos ecosistemas.*
-
-4.  **Ejecutar el Servidor de Desarrollo de Next.js:**
+    *   Crea un archivo `.env.local` si necesitas una `GOOGLE_API_KEY`.
+4.  **Ejecutar el Servidor de Desarrollo:**
     ```bash
     npm run dev
     ```
-    La aplicación estará disponible en `http://localhost:9002` (o el puerto que hayas configurado).
-
-5.  **Ejecutar el Servidor de Desarrollo de Genkit (para probar flujos de IA):**
-    En una terminal separada, ejecuta:
+    La aplicación estará en `http://localhost:9002`.
+5.  **Ejecutar el Inspector de Genkit (Opcional):**
     ```bash
     npm run genkit:dev
-    # o si quieres que se reinicie con los cambios:
-    # npm run genkit:watch
     ```
-    Esto iniciará el inspector de Genkit, usualmente en `http://localhost:4000`.
 
 ---
-
-¡Esperamos que disfrutes usando y explorando DevTrack Lite! Si tienes ideas o encuentras algún problema, no dudes en abrir un "Issue".
-```
+¡Disfruta de DevTrack Lite!
