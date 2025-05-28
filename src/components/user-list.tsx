@@ -15,7 +15,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 
 export const UserList: FC = () => {
-  const { users, isInitialized } = useUserStore();
+  const users = useUserStore((state) => state.users); // Actualizado para Zustand
+  const isInitialized = useUserStore((state) => state.isInitialized); // Actualizado para Zustand
 
   if (!isInitialized) {
     return (

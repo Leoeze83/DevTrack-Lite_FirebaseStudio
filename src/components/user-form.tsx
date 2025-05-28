@@ -31,7 +31,7 @@ interface UserFormProps {
 }
 
 export const UserForm: FC<UserFormProps> = ({ /* userId */ }) => {
-  const { addUser } = useUserStore();
+  const addUser = useUserStore((state) => state.addUser); // Actualizado para Zustand
   const { toast } = useToast();
   const router = useRouter();
   // const isEditMode = Boolean(userId);
@@ -50,7 +50,7 @@ export const UserForm: FC<UserFormProps> = ({ /* userId */ }) => {
     const newUser = addUser({
       name: data.name,
       email: data.email,
-      password: data.password, // Guardar la contraseña
+      password: data.password,
     });
     toast({
       title: "¡Usuario Creado!",
