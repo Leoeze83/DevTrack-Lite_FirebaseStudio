@@ -1,7 +1,7 @@
 
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { FC } from "react";
 import {
   Sidebar,
@@ -13,7 +13,8 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { TicketCheck, LayoutDashboard, PlusSquare, Settings, LogOut, Users, BarChart3 } from "lucide-react"; // Eliminado List
+import { TicketCheck, LayoutDashboard, PlusSquare, Settings, LogOut, Users, BarChart3 } from "lucide-react";
+import { useAuthStore } from "@/lib/hooks/useAuthStore";
 
 const navItems = [
   { href: "/", label: "Panel Principal", icon: LayoutDashboard },
@@ -27,6 +28,13 @@ const adminNavItems = [
 
 export const AppSidebar: FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuthStore(); // Solo necesitamos logout del store
+
+  const handleLogout = () => {
+    logout(); // Esto limpia el currentUser en el store y localStorage
+    router.push("/login"); // Esto redirige al usuario
+  };
 
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
@@ -44,7 +52,7 @@ export const AppSidebar: FC = () => {
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname === item.href || (item.href === "/reports" && pathname.startsWith("/reports"))}
+                isActive={pathname === item.href || (item.href === "/reports" && pathname.startsWith("/reports")) || (item.href === "/" && pathname.startsWith("/tickets/") && pathname.endsWith("/edit"))}
                 tooltip={{ children: item.label, className: "ml-2"}}
               >
                 <Link href={item.href}>
@@ -90,9 +98,16 @@ export const AppSidebar: FC = () => {
               </SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={{ children: "Cerrar Sesión", className: "ml-2"}} variant="outline">
-                {/* Simulación de cierre de sesión, no implementado realmente */}
-                <button onClick={() => alert("Funcionalidad de Cerrar Sesión no implementada.")}> 
+              <SidebarMenuButton 
+                asChild // Aseguramos que SidebarMenuButton actúe como un Slot
+                tooltip={{ children: "Cerrar Sesión", className: "ml-2"}} 
+                variant="outline"
+              >
+                <button 
+                  type="button" 
+                  onClick={handleLogout} // El onClick ahora está en un botón explícito
+                  className="w-full flex items-center justify-start text-left" // Asegura que el botón interno tome los estilos y el ancho
+                > 
                   <LogOut />
                   <span>Cerrar Sesión</span>
                 </button>
