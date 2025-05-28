@@ -58,18 +58,33 @@ export const useAuthStore = create<AuthState>()(
     {
       name: AUTH_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state._setIsAuthLoading(false); // Cuando el estado se rehidrata, la carga ha terminado
-        }
-      }
+      // onRehydrateStorage se llama después de que el estado ha sido rehidratado.
+      // Usaremos onFinishHydration para mayor claridad, que es el evento específico para esto.
+      // Si onFinishHydration da problemas consistentemente, podríamos volver a onRehydrateStorage
+      // y llamar a getState()._setIsAuthLoading(false) desde ahí, pero onFinishHydration es más idiomático.
     }
   )
 );
 
 // Sincronizar el estado de carga inicial
 // Esto se asegura de que isAuthLoading se establezca en false una vez que la persistencia se haya rehidratado
-const unsub = useAuthStore.persist.onFinishHydration((state) => {
-  state._setIsAuthLoading(false);
-  unsub(); // Solo necesitamos esto una vez
-});
+// Se aplaza la ejecución para dar tiempo a que el store se inicialice completamente en el cliente.
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    if (useAuthStore.persist && typeof useAuthStore.persist.onFinishHydration === 'function') {
+      const unsub = useAuthStore.persist.onFinishHydration(() => {
+        useAuthStore.getState()._setIsAuthLoading(false);
+        unsub(); // Solo necesitamos esto una vez
+      });
+    } else {
+      console.warn(
+        "Zustand persist API (onFinishHydration) no está disponible. " +
+        "Estableciendo isAuthLoading a false como fallback. " +
+        "Esto podría indicar un problema con la inicialización del middleware persist."
+      );
+      // Como fallback, si la API de persistencia no está disponible,
+      // actualizamos isAuthLoading directamente. Esto es para evitar que la UI se quede bloqueada.
+      useAuthStore.getState()._setIsAuthLoading(false);
+    }
+  }, 0);
+}
