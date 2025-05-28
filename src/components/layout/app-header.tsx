@@ -3,27 +3,17 @@
 import type { FC } from "react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Importar useRouter
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { TicketCheck, Moon, Sun, PanelLeftOpen, UserCircle, SettingsIcon, LogOutIcon } from "lucide-react";
+// Avatar y DropdownMenu ya no se usan directamente aquí para el perfil.
+import { TicketCheck, Moon, Sun, PanelLeftOpen } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useAuthStore } from "@/lib/hooks/useAuthStore";
+// useAuthStore ya no se necesita aquí para currentUser o logout directamente.
 
 export const AppHeader: FC = () => {
-  const { isMobile } = useSidebar();
+  // isMobile ya no se usa aquí para lógica de avatar
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
-  const { currentUser, logout } = useAuthStore();
-  const router = useRouter(); // Inicializar useRouter
+  // currentUser y logout se manejarán en AppSidebar para el nuevo menú de perfil.
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -52,20 +42,6 @@ export const AppHeader: FC = () => {
     } else {
       document.documentElement.classList.remove("dark");
     }
-  };
-
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
-
-  const getUserInitials = (name?: string) => {
-    if (!name) return "U";
-    const nameParts = name.split(" ");
-    if (nameParts.length > 1) {
-      return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -108,46 +84,7 @@ export const AppHeader: FC = () => {
           </Tooltip>
         </TooltipProvider>
 
-        {currentUser && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 md:h-9 md:w-9 rounded-full">
-                <Avatar className="h-8 w-8 md:h-9 md:w-9">
-                  <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
-                  <AvatarFallback>{getUserInitials(currentUser.name)}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{currentUser.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {currentUser.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/profile">
-                  <UserCircle className="mr-2 h-4 w-4" />
-                  <span>Mi Perfil</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings">
-                  <SettingsIcon className="mr-2 h-4 w-4" />
-                  <span>Configuración</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOutIcon className="mr-2 h-4 w-4" />
-                <span>Cerrar Sesión</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        {/* El DropdownMenu del perfil de usuario se ha movido a AppSidebar */}
       </div>
     </header>
   );

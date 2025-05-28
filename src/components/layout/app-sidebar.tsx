@@ -1,7 +1,7 @@
 
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // No necesitamos useRouter aquí
+import { usePathname, useRouter } from "next/navigation";
 import type { FC } from "react";
 import {
   Sidebar,
@@ -10,11 +10,20 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter, // No se usará SidebarFooter
+  SidebarFooter, // Importar SidebarFooter
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { TicketCheck, LayoutDashboard, PlusSquare, Settings, Users, BarChart3 } from "lucide-react";
-// useAuthStore ya no se necesita aquí para logout
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Importar Avatar
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"; // Importar DropdownMenu
+import { TicketCheck, LayoutDashboard, PlusSquare, Users, BarChart3, UserCircle, SettingsIcon, LogOutIcon } from "lucide-react";
+import { useAuthStore } from "@/lib/hooks/useAuthStore";
 
 const navItems = [
   { href: "/", label: "Panel Principal", icon: LayoutDashboard },
@@ -26,21 +35,24 @@ const adminNavItems = [
   { href: "/admin/users", label: "Gestión de Usuarios", icon: Users },
 ];
 
-// Los enlaces de Cuenta (Perfil, Configuración) y Cerrar Sesión se mueven al AppHeader
-// const userNavItems = [
-//   { href: "/profile", label: "Mi Perfil", icon: UserCircle2 },
-//   { href: "/settings", label: "Configuración", icon: Settings },
-// ];
-
 export const AppSidebar: FC = () => {
   const pathname = usePathname();
-  // const router = useRouter(); // Ya no es necesario aquí
-  // const { logout, currentUser } = useAuthStore(); // Ya no es necesario aquí
+  const router = useRouter();
+  const { currentUser, logout } = useAuthStore();
 
-  // const handleLogout = () => { // Movido a AppHeader
-  //   logout(); 
-  //   router.push("/login"); 
-  // };
+  const handleLogout = () => {
+    logout(); 
+    router.push("/login"); 
+  };
+
+  const getUserInitials = (name?: string) => {
+    if (!name) return "U";
+    const nameParts = name.split(" ");
+    if (nameParts.length > 1) {
+      return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
@@ -70,7 +82,6 @@ export const AppSidebar: FC = () => {
           ))}
         </SidebarMenu>
         
-        {/* Sección de Admin */}
         <SidebarMenu className="mt-4 pt-4 border-t border-sidebar-border">
            <SidebarMenuItem>
              <span className="px-2 text-xs font-semibold text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">Admin</span>
@@ -90,10 +101,54 @@ export const AppSidebar: FC = () => {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
-
-        {/* La Sección de Cuenta (Perfil y Configuración) y Cerrar Sesión se han movido al AppHeader */}
       </SidebarContent>
-      {/* SidebarFooter ya no es necesario */}
+      
+      {currentUser && (
+        <SidebarFooter className="p-2 border-t border-sidebar-border">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="w-full justify-start items-center gap-2 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:p-0">
+                <Avatar className="h-7 w-7 group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6">
+                  <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                  <AvatarFallback>{getUserInitials(currentUser.name)}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden">
+                    <span className="text-sm font-medium text-sidebar-foreground truncate max-w-[120px]">{currentUser.name}</span>
+                    <span className="text-xs text-sidebar-foreground/70 truncate max-w-[120px]">{currentUser.email}</span>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 mb-2 group-data-[side=left]:ml-1 group-data-[side=right]:mr-1" side="top" align="start">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{currentUser.name}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {currentUser.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <UserCircle className="mr-2 h-4 w-4" />
+                  <span>Mi Perfil</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  <span>Configuración</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOutIcon className="mr-2 h-4 w-4" />
+                <span>Cerrar Sesión</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 };

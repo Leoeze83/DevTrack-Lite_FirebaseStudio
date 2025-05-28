@@ -63,7 +63,7 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
     *   **`xlsx` (SheetJS):** Para la generación de informes en formato Excel.
 
 ### 🏗️ Estructura del Proyecto (Simplificada)
-```
+\`\`\`
 /src
 ├── ai/             # Lógica de IA con Genkit
 ├── app/            # Rutas (incluyendo /login, /admin, /reports, /profile, etc.)
@@ -73,18 +73,18 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 │   ├── types.ts    # Definiciones TypeScript
 │   └── utils.ts    # Utilidades generales
 └── ... (otros archivos de configuración)
-```
+\`\`\`
 
 ## ✨ Funcionalidades Detalladas
 
 ### 🔑 Autenticación (Simulada)
 *   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando un email y contraseña. La validación se hace contra los usuarios almacenados en `localStorage` (gestidos por `useUserStore`).
 *   **Creación de Usuarios:** Desde `/admin/users/create`, se pueden crear nuevos usuarios especificando nombre, email y contraseña.
-*   **Cierre de Sesión:** Un botón en el menú de perfil en la cabecera permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
+*   **Cerrar Sesión:** Un botón en el menú de perfil (ubicado ahora en el pie de la barra lateral cuando está expandida, o como un menú desplegable desde el avatar en modo ícono) permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
 *   **Protección de Rutas:** Un componente `AuthGuard` redirige a los usuarios no autenticados a la página de login si intentan acceder a rutas protegidas.
 
 ### 👤 Gestión de Perfil de Usuario
-*   **Menú de Perfil en Cabecera:** Un avatar en la cabecera despliega un menú con el nombre/email del usuario, y enlaces a "Mi Perfil", "Configuración" y "Cerrar Sesión".
+*   **Menú de Perfil en Barra Lateral/Cabecera:** Un avatar en el pie de la barra lateral (o en la cabecera, dependiendo de la implementación final tras ajustes) despliega un menú con el nombre/email del usuario, y enlaces a "Mi Perfil", "Configuración" y "Cerrar Sesión".
 *   **Página "Mi Perfil" (`/profile`):** Accesible desde el menú de perfil.
     *   **Visualización y Edición:** Muestra el nombre, correo electrónico y avatar del usuario actual.
     *   **Cambio de Nombre:** Permite editar el nombre del usuario.
@@ -114,28 +114,28 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 ## 🚀 Primeros Pasos
 
 1.  **Clonar el Repositorio:**
-    ```bash
+    \`\`\`bash
     git clone https://github.com/TU_USUARIO/NOMBRE_DE_TU_REPO.git
     cd NOMBRE_DE_TU_REPO
-    ```
+    \`\`\`
 2.  **Instalar Dependencias:**
-    ```bash
+    \`\`\`bash
     npm install
-    ```
+    \`\`\`
 3.  **Configurar Variables de Entorno (IA - Genkit):**
     *   Crea un archivo `.env.local` si necesitas una `GOOGLE_API_KEY` para usar Genkit con los modelos de Google.
-        ```
+        \`\`\`
         GOOGLE_API_KEY=TU_API_KEY_DE_GOOGLE_AI
-        ```
+        \`\`\`
 4.  **Ejecutar el Servidor de Desarrollo:**
-    ```bash
+    \`\`\`bash
     npm run dev
-    ```
+    \`\`\`
     La aplicación estará en `http://localhost:9002` (o el puerto que tengas configurado).
 5.  **Ejecutar el Inspector de Genkit (Opcional, para depurar flujos IA):**
-    ```bash
+    \`\`\`bash
     npm run genkit:dev
-    ```
+    \`\`\`
     El inspector estará en `http://localhost:4000`.
 
 ---
