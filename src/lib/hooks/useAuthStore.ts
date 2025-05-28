@@ -21,22 +21,29 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       currentUser: null,
-      isAuthLoading: true,
+      isAuthLoading: true, // Inicialmente cargando
       
       login: async (identifier: string, password?: string) => {
+        // Podríamos establecer isAuthLoading a true aquí si queremos un spinner específico para el login
+        // set({ isAuthLoading: true }); 
         await new Promise(resolve => setTimeout(resolve, 300)); // Simular delay de red
-        const { users } = useUserStore.getState();
+        
+        const { users, isInitialized: usersInitialized } = useUserStore.getState();
+        
+        if (!usersInitialized) {
+          console.warn("AuthStore: El store de usuarios aún no está inicializado. El login podría fallar o usar datos obsoletos.");
+          // Opcionalmente, podríamos esperar/reintentar o devolver un error específico aquí.
+          // Por ahora, procedemos, pero es un punto a tener en cuenta si surgen problemas.
+        }
         
         let userFound: User | undefined = undefined;
         const identifierLower = identifier.toLowerCase();
 
         if (identifierLower.includes('@')) {
-          // Asumir que es un email completo
           userFound = users.find(
             (user) => user.email.toLowerCase() === identifierLower
           );
         } else {
-          // Asumir que es la parte del nombre de usuario del email
           userFound = users.find(
             (user) => {
               const emailUsernamePart = user.email.substring(0, user.email.indexOf('@')).toLowerCase();
@@ -46,19 +53,18 @@ export const useAuthStore = create<AuthState>()(
         }
 
         if (userFound) {
-          // Validar contraseña
           if (password && userFound.password === password) {
             const { password: _p, ...userToStore } = userFound;
             set({ currentUser: userToStore, isAuthLoading: false });
             return true;
-          } else if (!password && !userFound.password) { // Permitir login si no se provee contraseña y el usuario no tiene una
+          } else if (!password && !userFound.password) {
             const { password: _p, ...userToStore } = userFound;
             set({ currentUser: userToStore, isAuthLoading: false });
             return true;
           }
         }
-        // Si no se encontró usuario o la contraseña no coincide (y era requerida)
-        set({ isAuthLoading: false }); // Asegurarse de que isAuthLoading se ponga en false
+        
+        set({ isAuthLoading: false }); // Asegurar que se ponga en false en caso de fallo
         return false;
       },
 
@@ -81,37 +87,29 @@ export const useAuthStore = create<AuthState>()(
     {
       name: AUTH_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: () => {
-        return (state, error) => {
-          if (error) {
-            console.error("AuthStore: ocurrió un error durante la rehidratación", error);
-          }
-          // Aplazar la ejecución para asegurar que el store principal esté completamente definido
-          setTimeout(() => {
-            if (useAuthStore.persist && typeof useAuthStore.persist.onFinishHydration === 'function') {
-                // Ya no necesitamos suscribirnos a onFinishHydration aquí si onRehydrateStorage ya se encarga.
-                // Simplemente establecemos isAuthLoading a false.
-                useAuthStore.getState()._setIsAuthLoading(false);
-            } else {
-                // Fallback si la API persist no está lista (poco probable si onRehydrateStorage se disparó)
-                console.warn("AuthStore: No se pudo acceder a la API de persist para onFinishHydration, estableciendo isAuthLoading a false directamente.");
-                useAuthStore.getState()._setIsAuthLoading(false);
-            }
-          }, 0);
-        };
+      onRehydrateStorage: (stateFromStorage, error) => {
+        if (error) {
+          console.error("AuthStore: Error durante la rehidratación desde localStorage", error);
+        }
+        // La rehidratación ha terminado (o fallado).
+        // Ahora podemos establecer isAuthLoading a false.
+        // Usamos setTimeout para asegurar que esto ocurra después del ciclo de render actual
+        // y que el store 'useAuthStore' esté completamente definido.
+        setTimeout(() => {
+          useAuthStore.getState()._setIsAuthLoading(false);
+        }, 0);
       },
     }
   )
 );
 
-// Asegurar que isAuthLoading se establezca en false después de la hidratación inicial
+// Fallback adicional para asegurar que isAuthLoading se establezca en false
 // si onRehydrateStorage no se ejecutó por alguna razón o fue muy rápido.
-// Este es un fallback adicional.
 if (typeof window !== 'undefined') {
     setTimeout(() => {
         const state = useAuthStore.getState();
         if (state.isAuthLoading) { // Solo si aún está cargando
-            console.warn("AuthStore: Fallback - Estableciendo isAuthLoading a false después del timeout inicial.");
+            console.warn("AuthStore: Fallback de seguridad - Estableciendo isAuthLoading a false después del timeout inicial.");
             state._setIsAuthLoading(false);
         }
     }, 500); // Un pequeño delay para dar tiempo a la rehidratación normal
