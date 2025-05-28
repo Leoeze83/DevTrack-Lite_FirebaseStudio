@@ -5,69 +5,63 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { User } from '@/lib/types';
 
-const USERS_STORAGE_KEY = "devtrack_users_v_zustand"; // Nueva clave para evitar conflictos
+const USERS_STORAGE_KEY = "devtrack_users_v_zustand";
 
 interface UserStoreState {
   users: User[];
   isInitialized: boolean;
   addUser: (newUserData: Omit<User, "id" | "createdAt" | "avatarUrl"> & { password?: string }) => User;
-  _setIsInitialized: (initialized: boolean) => void;
+  getUsers: () => User[];
+  getUserById: (id: string) => User | undefined;
 }
 
 export const useUserStore = create<UserStoreState>()(
   persist(
     (set, get) => ({
       users: [],
-      isInitialized: false, // Se establecerá a true después de la hidratación
+      isInitialized: false, // Comienza como false
       addUser: (newUserData) => {
         const newUser: User = {
           name: newUserData.name,
           email: newUserData.email,
-          password: newUserData.password, // Guardar contraseña
+          password: newUserData.password,
           id: crypto.randomUUID(),
           createdAt: new Date().toISOString(),
           // avatarUrl puede ser añadido aquí si se pasa en newUserData
         };
         set((state) => ({
-          // Añade el nuevo usuario y ordena por fecha de creación descendente
           users: [newUser, ...state.users].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         }));
         return newUser;
       },
-      _setIsInitialized: (initialized: boolean) => {
-        set({ isInitialized: initialized });
+      getUsers: () => {
+        return get().users;
+      },
+      getUserById: (id: string) => {
+        return get().users.find(user => user.id === id);
       }
     }),
     {
       name: USERS_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      // onRehydrateStorage es llamado después de que el estado ha sido rehidratado
-      // y fusionado con el estado inicial.
+      // onRehydrateStorage se llama después de que el estado ha sido rehidratado.
+      // La función que devolvemos aquí se ejecutará después de la rehidratación.
       onRehydrateStorage: () => {
-        // No es necesario hacer nada aquí si _setIsInitialized se llama desde fuera
-        // o si usamos onFinishHydration.
-      }
+        return (state, error) => {
+          if (error) {
+            console.error("UserStore: ocurrió un error durante la rehidratación", error);
+          }
+          // Establecer isInitialized a true después de que la rehidratación haya ocurrido
+          // Esto asegura que cualquier componente que dependa de isInitialized se actualice.
+          // Usamos setState directamente del store aquí.
+          useUserStore.setState({ isInitialized: true });
+        };
+      },
     }
   )
 );
 
-// Sincronizar el estado de carga inicial, similar a useAuthStore
-// Esto se asegura de que isInitialized se establezca en false una vez que la persistencia se haya rehidratado
-if (typeof window !== 'undefined') {
-  setTimeout(() => { // Aplazar para asegurar que el store esté completamente inicializado
-    if (useUserStore.persist && typeof useUserStore.persist.onFinishHydration === 'function') {
-      const unsub = useUserStore.persist.onFinishHydration(() => {
-        useUserStore.getState()._setIsInitialized(true);
-        unsub(); // Solo necesitamos esto una vez
-      });
-    } else {
-      console.warn(
-        "Zustand persist API (onFinishHydration) para useUserStore no está disponible. " +
-        "Estableciendo isInitialized a true como fallback."
-      );
-      // Como fallback, si la API de persistencia no está disponible,
-      // actualizamos isInitialized directamente.
-      useUserStore.getState()._setIsInitialized(true);
-    }
-  }, 0);
-}
+// Para el caso inicial donde localStorage podría estar vacío,
+// la primera vez onRehydrateStorage se llamará con el estado inicial (isInitialized: false).
+// Luego, setState({ isInitialized: true }) actualizará el estado.
+// Los componentes que leen isInitialized reaccionarán a este cambio.
