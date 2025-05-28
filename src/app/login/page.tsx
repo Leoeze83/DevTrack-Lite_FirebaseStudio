@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react"; // Importar useEffect
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -15,7 +15,7 @@ import { useAuthStore } from "@/lib/hooks/useAuthStore";
 import { Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
-  email: z.string().email("Por favor, ingresa un correo electrónico válido."),
+  identifier: z.string().min(1, "El email o nombre de usuario es obligatorio."),
   password: z.string().min(1, "La contraseña es obligatoria."),
 });
 
@@ -24,26 +24,23 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { login, currentUser, isAuthLoading } = useAuthStore(); // Añadir isAuthLoading
+  const { login, currentUser, isAuthLoading } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
     },
   });
 
   useEffect(() => {
-    // Solo redirigir si la autenticación no está cargando y el usuario ya existe
     if (!isAuthLoading && currentUser) {
       router.replace("/");
     }
   }, [currentUser, isAuthLoading, router]);
 
-  // Si la autenticación está cargando o ya hay un usuario (y la redirección está en curso),
-  // podríamos mostrar un loader o null para evitar renderizar el formulario innecesariamente.
   if (isAuthLoading || currentUser) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
@@ -54,7 +51,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    const success = await login(data.email, data.password);
+    const success = await login(data.identifier, data.password);
     setIsLoading(false);
 
     if (success) {
@@ -62,18 +59,14 @@ export default function LoginPage() {
         title: "¡Inicio de Sesión Exitoso!",
         description: "Bienvenido de nuevo.",
       });
-      // El useEffect se encargará de la redirección si currentUser se actualiza
-      // No es necesario router.push("/") aquí si el useEffect ya lo maneja.
-      // Sin embargo, para una redirección inmediata tras el login, podría mantenerse,
-      // pero asegurándose de que no cause conflictos con el useEffect.
-      // Por ahora, confiamos en el useEffect.
+      // El useEffect se encargará de la redirección
     } else {
       toast({
         title: "Error de Inicio de Sesión",
-        description: "Correo electrónico o contraseña incorrectos. Por favor, intenta de nuevo.",
+        description: "Identificador o contraseña incorrectos. Por favor, intenta de nuevo.",
         variant: "destructive",
       });
-      form.setValue("password", ""); // Limpiar campo de contraseña en error
+      form.setValue("password", "");
     }
   };
 
@@ -89,12 +82,12 @@ export default function LoginPage() {
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
-                name="email"
+                name="identifier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo Electrónico</FormLabel>
+                    <FormLabel>Email o Nombre de Usuario</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="tu@email.com" {...field} />
+                      <Input placeholder="tu@email.com o tu_usuario" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -20,7 +20,7 @@
     *   Filtra los datos para análisis específicos.
     *   Exporta informes a PDF y Excel.
 *   🔑 **Autenticación (Simulada):**
-    *   Página de inicio de sesión con validación de email y contraseña.
+    *   Página de inicio de sesión con validación de email/nombre de usuario y contraseña.
     *   Creación de usuarios con nombre, email y contraseña.
     *   Funcionalidad de "Cerrar Sesión" desde el menú de perfil en la barra lateral.
     *   Protección básica de rutas.
@@ -63,7 +63,7 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
     *   **`xlsx` (SheetJS):** Para la generación de informes en formato Excel.
 
 ### 🏗️ Estructura del Proyecto (Simplificada)
-\`\`\`
+```
 /src
 ├── ai/             # Lógica de IA con Genkit
 ├── app/            # Rutas (incluyendo /login, /admin, /reports, /profile, etc.)
@@ -74,15 +74,15 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 │   ├── types.ts    # Definiciones TypeScript
 │   └── utils.ts    # Utilidades generales
 └── ... (otros archivos de configuración)
-\`\`\`
+```
 
 ## ✨ Funcionalidades Detalladas
 
 ### 🔑 Autenticación (Simulada)
-*   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando un email y contraseña. La validación se hace contra los usuarios almacenados en `localStorage` (gestidos por `useUserStore`).
-    *   **Usuarios Predeterminados para Despliegue:** En entornos como Vercel, si no hay usuarios en `localStorage`, se cargarán usuarios de demostración desde un archivo `seed-users.json` para permitir el inicio de sesión. Puedes usar:
-        *   Email: `devuser@example.com` / Contraseña: `987654321`
-        *   Email: `usertest@example.com` / Contraseña: `123456789`
+*   **Página de Login (`/login`):** Permite a los usuarios "iniciar sesión" usando su correo electrónico completo, o solo la parte del nombre de usuario (lo que está antes del "@"), y su contraseña. La validación se hace contra los usuarios almacenados en `localStorage` (gestidos por `useUserStore`).
+    *   **Usuarios Predeterminados para Despliegue:** En entornos como Vercel, si no hay usuarios en `localStorage`, se cargarán usuarios de demostración desde `src/lib/data/seed-users.json` para permitir el inicio de sesión. Puedes usar:
+        *   Email/Usuario: `devuser@example.com` o `devuser` / Contraseña: `987654321`
+        *   Email/Usuario: `usertest@example.com` o `usertest` / Contraseña: `123456789`
 *   **Creación de Usuarios:** Desde `/admin/users/create`, se pueden crear nuevos usuarios especificando nombre, email y contraseña. Estos usuarios se guardan en `localStorage`. En un entorno desplegado, estos usuarios creados solo existirán en el navegador del visitante actual.
 *   **Cerrar Sesión:** Un botón en el menú de perfil (ubicado en el pie de la barra lateral) permite al usuario "cerrar sesión", limpiando el estado de autenticación y redirigiendo a la página de login.
 *   **Protección de Rutas:** Un componente `AuthGuard` redirige a los usuarios no autenticados a la página de login si intentan acceder a rutas protegidas.
@@ -118,28 +118,28 @@ Este proyecto está construido con un stack tecnológico moderno y eficiente:
 ## 🚀 Primeros Pasos
 
 1.  **Clonar el Repositorio:**
-    \`\`\`bash
+    ```bash
     git clone https://github.com/TU_USUARIO/NOMBRE_DE_TU_REPO.git
     cd NOMBRE_DE_TU_REPO
-    \`\`\`
+    ```
 2.  **Instalar Dependencias:**
-    \`\`\`bash
+    ```bash
     npm install
-    \`\`\`
+    ```
 3.  **Configurar Variables de Entorno (IA - Genkit):**
     *   Crea un archivo `.env.local` si necesitas una `GOOGLE_API_KEY` para usar Genkit con los modelos de Google.
-        \`\`\`
+        ```
         GOOGLE_API_KEY=TU_API_KEY_DE_GOOGLE_AI
-        \`\`\`
+        ```
 4.  **Ejecutar el Servidor de Desarrollo:**
-    \`\`\`bash
+    ```bash
     npm run dev
-    \`\`\`
+    ```
     La aplicación estará en `http://localhost:9002` (o el puerto que tengas configurado).
 5.  **Ejecutar el Inspector de Genkit (Opcional, para depurar flujos IA):**
-    \`\`\`bash
+    ```bash
     npm run genkit:dev
-    \`\`\`
+    ```
     El inspector estará en `http://localhost:4000`.
 
 ---
